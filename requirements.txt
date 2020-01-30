@@ -35,4 +35,5 @@ tornado==6.0.3
 urwid==2.0.1
 Werkzeug==0.16.0
 wsproto==0.14.1
+xvfbwrapper==0.2.9
 zstandard==0.12.0
