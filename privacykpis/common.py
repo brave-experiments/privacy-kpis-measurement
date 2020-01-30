@@ -1,4 +1,3 @@
-import importlib
 import json
 import platform
 from subprocess import Popen, PIPE
@@ -40,15 +39,13 @@ def record(args: Args):
   case_module_name = None
 
   if args.case == "safari":
-    case_module_name = "privacykpis.browsers.safari"
+    import privacykpis.browsers.safari as case_module
   elif args.case == "chrome":
     platform_name = platform.system()
     if platform_name == "Darwin":
-      case_module_name = "privacykpis.browsers.chrome_macos"
+      import privacykpis.browsers.chrome_macos as case_module
     elif platform_name == "Linux":
-      case_module_name = "privacykpis.browsers.chrome_linux"
-
-  case_module = importlib.import_module(case_module_name)
+      import privacykpis.browsers.chrome_linux as case_module
 
   if args.install is True:
     case_module.setup_env(args)
