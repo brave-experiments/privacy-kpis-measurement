@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 from xvfbwrapper import Xvfb
@@ -7,7 +8,9 @@ import privacykpis.environments.linux
 
 
 def launch_browser(args: Args):
+  less_privileged_user = os.getlogin()
   args = [
+    "sudo", "-u", less_privileged_user,
     args.binary,
     "--user-data-dir=" + args.profile_path,
     "--proxy-server='{}:{}'".format(args.proxy_host, args.proxy_port),
