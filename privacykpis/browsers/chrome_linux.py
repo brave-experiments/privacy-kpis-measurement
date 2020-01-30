@@ -1,3 +1,5 @@
+import subprocess
+
 from xvfbwrapper import Xvfb
 
 from privacykpis.args import Args
@@ -8,8 +10,7 @@ def launch_browser(args: Args):
   args = [
     args.binary,
     "--user-data-dir=" + args.profile_path,
-    "--proxy-server='{}:{}'".format(args.proxy_host, args.proxy_port)
-
+    "--proxy-server='{}:{}'".format(args.proxy_host, args.proxy_port),
     args.url
   ]
   xvfb_handle = Xvfb()

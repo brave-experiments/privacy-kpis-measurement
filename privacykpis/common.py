@@ -49,7 +49,9 @@ def record(args: Args):
       case_module_name = "privacykpis.browsers.chrome_linux"
 
   case_module = importlib.import_module(case_module_name)
-  case_module.setup_env(args)
+
+  if args.install is True:
+    case_module.setup_env(args)
 
   proxy_handle = setup_proxy_for_url(args)
 
@@ -63,4 +65,5 @@ def record(args: Args):
   case_module.close_browser(args, browser_info)
 
   teardown_proxy(proxy_handle, args)
-  case_module.teardown_env(args)
+  if args.uninstall is True:
+    case_module.teardown_env(args)

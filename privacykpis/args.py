@@ -1,6 +1,8 @@
+import os
 import pathlib
 import sys
 from urllib.parse import urlparse
+
 
 class Args:
   def __init__(self, args):
@@ -38,7 +40,16 @@ class Args:
     self.proxy_host = args.proxy_host
     self.proxy_port = str(args.proxy_port)
     self.log = args.log
+
+    if args.install is True or args.uninstall is True:
+      if os.geteuid() != 0:
+        print("must run as root if you want to modify certs")
+        return
+
+    self.uninstall = args.uninstall
+    self.install = args.install
     self.is_valid = True
+
 
   def valid(self):
     return self.is_valid
