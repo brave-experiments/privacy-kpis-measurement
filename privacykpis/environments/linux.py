@@ -18,5 +18,5 @@ def setup_env(args: Args):
   subprocess.run(["sudo", "update-ca-certificates"], check=True)
 
 def teardown_env(args: Args):
-  shutil.rmtree(str(DEBIAN_CERT_DIR))
+  DEBIAN_CERT_DEST_PATH.unlink()
   subprocess.run(["sudo", "update-ca-certificates"], check=True)
