@@ -7,7 +7,7 @@ from privacykpis.args import Args
 from privacykpis.consts import LEAF_CERT
 
 
-DEBIAN_CERT_DIR = Path("/usr/share/ca-certificates/privacykpis")
+DEBIAN_CERT_DIR = Path("/usr/local/share/ca-certificates")
 DEBIAN_CERT_DEST_PATH = DEBIAN_CERT_DIR / Path("mitmproxy.crt")
 
 

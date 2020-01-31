@@ -25,7 +25,6 @@ def launch_browser(args: Args):
 def close_browser(args: Args, browser_info):
   browser_handle, xvfb_handle = browser_info
   browser_handle.terminate()
-  time.sleep(3)
   xvfb_handle.stop()
 
 
