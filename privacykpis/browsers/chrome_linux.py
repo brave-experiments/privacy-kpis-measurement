@@ -23,8 +23,8 @@ def launch_browser(args: Args):
 
 def close_browser(args: Args, browser_info):
   browser_handle, xvfb_handle = browser_info
-  xvfb_handle.stop()
   browser_handle.terminate()
+  xvfb_handle.stop()
 
 
 setup_env = privacykpis.environments.linux.setup_env
