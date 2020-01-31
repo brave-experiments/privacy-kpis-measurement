@@ -1,5 +1,6 @@
 import os
 import subprocess
+import time
 
 from xvfbwrapper import Xvfb
 
@@ -24,7 +25,7 @@ def launch_browser(args: Args):
 def close_browser(args: Args, browser_info):
   browser_handle, xvfb_handle = browser_info
   browser_handle.terminate()
-  browser_handle.wait()
+  sleep(3)
   xvfb_handle.stop()
 
 
