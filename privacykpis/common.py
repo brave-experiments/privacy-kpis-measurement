@@ -6,6 +6,10 @@ from time import sleep
 from privacykpis.args import Args
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 
+import privacykpis.browsers.safari as safari_module
+import privacykpis.browsers.chrome_macos as chrome_macos_module
+import privacykpis.browsers.chrome_linux as chrome_linux_module
+
 
 def setup_proxy_for_url(args: Args):
   mitmdump_args = [
@@ -36,16 +40,15 @@ def teardown_proxy(proxy_handle, args: Args):
 
 
 def record(args: Args):
-  case_module_name = None
-
+  case_module = None
   if args.case == "safari":
-    import privacykpis.browsers.safari as case_module
+    case_module = safari_module
   elif args.case == "chrome":
     platform_name = platform.system()
     if platform_name == "Darwin":
-      import privacykpis.browsers.chrome_macos as case_module
+      case_module = chrome_macos_module
     elif platform_name == "Linux":
-      import privacykpis.browsers.chrome_linux as case_module
+      case_module = chrome_linux_module
 
   if args.install is True:
     case_module.setup_env(args)
