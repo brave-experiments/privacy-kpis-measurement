@@ -6,6 +6,7 @@ import time
 from xvfbwrapper import Xvfb
 
 from privacykpis.args import Args
+from privacykpis.consts import LEAF_CERT
 import privacykpis.environments.linux
 
 
