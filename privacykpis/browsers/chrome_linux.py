@@ -10,6 +10,10 @@ from privacykpis.consts import LEAF_CERT
 import privacykpis.environments.linux
 
 
+CHROME_CERT_PATH = Path.home() / Path(".pki/nssdb")
+CHROME_CERT_URI = "sql:" + str(CHROME_CERT_PATH)
+
+
 def launch_browser(args: Args):
     args = [
         args.binary,
@@ -29,11 +33,12 @@ def close_browser(args: Args, browser_info):
 
 
 def setup_env(args: Args):
-    user_home_dir = str(Path.home())
+    if not CHROME_CERT_PATH.is_dir():
+        CHROME_CERT_PATH.mkdir()
     install_cert_args = [
         "certutil", "-A",
         "-n", "mitmproxy",
-        "-d", "sql:{}/.pki/nssdb".format(user_home_dir),
+        "-d", CHROME_CERT_URI,
         "-t", "C,,",
         "-i", str(LEAF_CERT)
     ]
@@ -41,10 +46,9 @@ def setup_env(args: Args):
 
 
 def teardown_env(args: Args):
-    user_home_dir = str(Path.home())
     uninstall_cert_args = [
         "certutil", "-D",
-        "-d", "sql:{}/.pki/nssdb".format(user_home_dir),
+        "-d", CHROME_CERT_URI,
         "-n", "mitmproxy"
     ]
     subprocess.run(uninstall_cert_args, check=True)
