@@ -8,7 +8,6 @@ from xvfbwrapper import Xvfb
 
 from privacykpis.args import Args
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
-import privacykpis.environments.linux
 
 
 def launch_browser(args: Args):
@@ -33,5 +32,9 @@ def close_browser(args: Args, browser_info):
     xvfb_handle.stop()
 
 
-setup_env = privacykpis.environments.linux.setup_env
-teardown_env = privacykpis.environments.linux.teardown_env
+def setup_env(args: Args):
+    pass
+
+
+def teardown_env(args: Args):
+    pass
