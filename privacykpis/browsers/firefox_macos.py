@@ -4,8 +4,6 @@ import shutil
 import subprocess
 import time
 
-from xvfbwrapper import Xvfb
-
 from privacykpis.args import Args
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
 import privacykpis.environments.linux
