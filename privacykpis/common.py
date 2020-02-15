@@ -3,7 +3,7 @@ import platform
 from subprocess import Popen, PIPE
 from time import sleep
 
-from privacykpis.args import MeasureArgs, ConfigArgs
+from privacykpis.args import MeasureArgs, ConfigArgs, Args
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 
 import privacykpis.browsers.firefox_linux as firefox_linux_module
