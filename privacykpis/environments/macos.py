@@ -1,6 +1,6 @@
 import subprocess
 
-from privacykpis.args import Args
+from privacykpis.args import ConfigArgs
 from privacykpis.consts import LEAF_CERT
 
 TRUSTED_SHELL_KARGS = dict(
@@ -33,7 +33,7 @@ def get_default_network_service():
     return default_net_service
 
 
-def setup_env(args: Args):
+def setup_env(args: ConfigArgs):
     default_net_service = get_default_network_service()
     configure_proxy_cmds = [
         ["-setwebproxy", default_net_service, args.proxy_host,
@@ -56,7 +56,7 @@ def setup_env(args: Args):
     subprocess.run(trust_cert_cmd, check=True)
 
 
-def teardown_env(args: Args):
+def teardown_env(args: ConfigArgs):
     default_net_service = get_default_network_service()
     configure_proxy_cmds = [
         ["-setwebproxy", default_net_service, "''", "''"],

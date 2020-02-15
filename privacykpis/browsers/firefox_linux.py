@@ -6,11 +6,12 @@ import time
 
 from xvfbwrapper import Xvfb
 
-from privacykpis.args import Args
+from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
+import privacykpis.environments.default
 
 
-def launch_browser(args: Args):
+def launch_browser(args: MeasureArgs):
     # Check to see if we need to copy the default firefox profile over to
     # wherever we're running from.
     if not pathlib.Path(args.profile_path).is_dir():
@@ -26,15 +27,11 @@ def launch_browser(args: Args):
     return [subprocess.Popen(args), xvfb_handle]
 
 
-def close_browser(args: Args, browser_info):
+def close_browser(args: MeasureArgs, browser_info):
     browser_handle, xvfb_handle = browser_info
     browser_handle.terminate()
     xvfb_handle.stop()
 
 
-def setup_env(args: Args):
-    pass
-
-
-def teardown_env(args: Args):
-    pass
+setup_env = privacykpis.environments.default.setup_env
+teardown_env = privacykpis.environments.default.teardown_env

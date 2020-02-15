@@ -4,12 +4,12 @@ import shutil
 import subprocess
 import time
 
-from privacykpis.args import Args
+from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
-import privacykpis.environments.linux
+import privacykpis.environments.default
 
 
-def launch_browser(args: Args):
+def launch_browser(args: MeasureArgs):
     # Check to see if we need to copy the default firefox profile over to
     # wherever we're running from.
     if not pathlib.Path(args.profile_path).is_dir():
@@ -23,9 +23,9 @@ def launch_browser(args: Args):
     return subprocess.Popen(args)
 
 
-def close_browser(args: Args, browser_handle):
+def close_browser(args: MeasureArgs, browser_handle):
     browser_handle.terminate()
 
 
-setup_env = privacykpis.environments.linux.setup_env
-teardown_env = privacykpis.environments.linux.teardown_env
+setup_env = privacykpis.environments.default.setup_env
+teardown_env = privacykpis.environments.default.teardown_env

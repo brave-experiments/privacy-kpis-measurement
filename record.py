@@ -25,13 +25,8 @@ PARSER.add_argument("--secs", default=30, type=int,
     help="Amount of time to allow the site to load for.")
 PARSER.add_argument("--binary",
     help="Path to the browser binary to use (required except for Safari).")
-PARSER.add_argument("--install", action="store_true",
-    help="Setting up the environment for measurement (installing MITM certs, etc.)")
-PARSER.add_argument("--uninstall", action="store_true",
-    help="Teardown the MITM environment after measurement.")
 
-
-ARGS = privacykpis.args.Args(PARSER.parse_args())
+ARGS = privacykpis.args.MeasureArgs(PARSER.parse_args())
 if not ARGS.valid():
     sys.exit(-1)
 

@@ -3,7 +3,7 @@ import platform
 from subprocess import Popen, PIPE
 from time import sleep
 
-from privacykpis.args import Args
+from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 
 import privacykpis.browsers.firefox_linux as firefox_linux_module
@@ -13,35 +13,7 @@ import privacykpis.browsers.chrome_linux as chrome_linux_module
 import privacykpis.browsers.safari as safari_module
 
 
-def setup_proxy_for_url(args: Args):
-    mitmdump_args = [
-        "mitmdump",
-        "--listen-host", args.proxy_host,
-        "--listen-port", args.proxy_port,
-        "-s", str(LOG_HEADERS_SCRIPT_PATH),
-        "--set", "confdir=" + str(CERT_PATH),
-        "-q",
-        json.dumps(dict(privacy_kpis_url=args.url, privacy_kpis_log=args.log))
-    ]
-
-    proxy_handle = Popen(mitmdump_args, stderr=None)
-    print("Waiting 5 sec for mitmproxy to spin up...")
-    sleep(5)
-    if proxy_handle.poll() is not None:
-        print("Something went sideways when running mitmproxy:")
-        print("\t" + " ".join(mitmdump_args))
-        return None
-
-    return proxy_handle
-
-
-def teardown_proxy(proxy_handle, args: Args):
-    print("Shutting down, giving proxy time to write log")
-    proxy_handle.terminate()
-    proxy_handle.wait()
-
-
-def record(args: Args):
+def module_for_args(args: Args):
     platform_name = platform.system()
     is_linux = platform_name == "Linux"
     is_mac = platform_name == "Darwin"
@@ -66,9 +38,39 @@ def record(args: Args):
             args.case, platform_name)
         raise RuntimeError(msg)
 
-    if args.install is True:
-        case_module.setup_env(args)
+    return case_module
 
+
+def setup_proxy_for_url(args: MeasureArgs):
+    mitmdump_args = [
+        "mitmdump",
+        "--listen-host", args.proxy_host,
+        "--listen-port", args.proxy_port,
+        "-s", str(LOG_HEADERS_SCRIPT_PATH),
+        "--set", "confdir=" + str(CERT_PATH),
+        "-q",
+        json.dumps(dict(privacy_kpis_url=args.url, privacy_kpis_log=args.log))
+    ]
+
+    proxy_handle = Popen(mitmdump_args, stderr=None)
+    print("Waiting 5 sec for mitmproxy to spin up...")
+    sleep(5)
+    if proxy_handle.poll() is not None:
+        print("Something went sideways when running mitmproxy:")
+        print("\t" + " ".join(mitmdump_args))
+        return None
+
+    return proxy_handle
+
+
+def teardown_proxy(proxy_handle, args: MeasureArgs):
+    print("Shutting down, giving proxy time to write log")
+    proxy_handle.terminate()
+    proxy_handle.wait()
+
+
+def record(args: MeasureArgs):
+    case_module = module_for_args(args)
     proxy_handle = setup_proxy_for_url(args)
     if proxy_handle is None:
         return
@@ -80,5 +82,11 @@ def record(args: Args):
     case_module.close_browser(args, browser_info)
 
     teardown_proxy(proxy_handle, args)
-    if args.uninstall is True:
+
+
+def configure_env(args: ConfigArgs):
+    case_module = module_for_args(args)
+    if args.install:
+        case_module.setup_env(args)
+    else:  # uninstall path.
         case_module.teardown_env(args)

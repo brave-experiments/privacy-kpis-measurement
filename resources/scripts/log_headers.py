@@ -1,11 +1,6 @@
 import datetime
-import getpass
 import json
-import os
-import pwd
 import sys
-
-from mitmproxy import ctx
 
 
 class HeaderLogger:
@@ -27,24 +22,13 @@ class HeaderLogger:
         with open(self.log_path, "w") as h:
             json.dump(complete_log, h)
 
-        # It would have been better to just run mitmproxy as a lower privilaged
-        # user, instead of running it as root and then changing the ownership
-        # afterwards, but mitmproxy crashes if run as non-root w/in root,
-        # so here is the hack.
-        current_user = getpass.getuser()
-        less_privileged_user = os.getlogin()
-        if current_user != less_privileged_user:
-            less_privileged_user_info = pwd.getpwnam(less_privileged_user)
-            less_privileged_uid = less_privileged_user_info.pw_uid
-            less_privilaged_gid = less_privileged_user_info.pw_gid
-            os.chown(self.log_path, less_privileged_uid, less_privilaged_gid)
-
     def request(self, flow):
         request_headers = [(k, v) for k, v in flow.request.headers.items()]
         log_data = {
           "url": flow.request.pretty_url,
           "headers": request_headers,
           "time": str(datetime.datetime.now()),
+          "body": flow.request.content,
         }
         self.requests.append(log_data)
 

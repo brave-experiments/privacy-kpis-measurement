@@ -59,6 +59,34 @@ def validate_chrome(args):
 
 
 class Args:
+    def valid(self):
+        return self.is_valid
+
+
+class ConfigArgs(Args):
+    def __init__(self, args):
+        self.is_valid = False
+
+        if not args.install or not args.uninstall:
+            err("Must select either 'install' or 'uninstall'")
+            return
+
+        if args.install and args.uninstall:
+            err("Cannot select both 'install' or 'uninstall'")
+            return
+
+        is_root = os.geteuid() == 0
+        if not is_root:
+            err("you'll need to run as root to configure the environment")
+            return
+
+        self.uninstall = args.uninstall
+        self.install = args.install
+        self.case = args.case
+        self.is_valid = True
+
+
+class MeasureArgs(Args):
     def __init__(self, args):
         self.is_valid = False
 
@@ -87,38 +115,15 @@ class Args:
             self.profile_path = args.profile_path
             self.binary = args.binary
 
-        platform_name = platform.system()
-        is_mac = platform_name == "Darwin"
-        is_linux = platform_name == "Linux"
         is_root = os.geteuid() == 0
-
-        # Try to avoid over privileging things where possible
-        is_changing_certs = args.install is True or args.uninstall is True
-
-        # If we're not mac AND changing certs, theres no need to run as root.
-        if is_root and (not is_changing_certs or not is_mac):
-            err("please don't run as root if you're not changing certs on mac")
+        if is_root:
+            err("please don't measure as root. Use sudo with ./environment.py "
+                "and run this script as a less privilaged user")
             return
-
-        if is_changing_certs:
-            platform_name = platform.system()
-            if is_mac and not is_root:
-                err("must run as root if you want to modify certs on MacOS")
-                return
-
-            if is_linux and not has_certutil_installed():
-                err("missing certutil (install something like libnss3-tools)")
-                return
 
         self.case = args.case
         self.secs = args.secs
         self.proxy_host = args.proxy_host
         self.proxy_port = str(args.proxy_port)
         self.log = args.log
-
-        self.uninstall = args.uninstall
-        self.install = args.install
         self.is_valid = True
-
-    def valid(self):
-        return self.is_valid

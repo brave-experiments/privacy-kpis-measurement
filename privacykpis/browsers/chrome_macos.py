@@ -2,15 +2,12 @@ import os
 import subprocess
 import time
 
-from privacykpis.args import Args
+from privacykpis.args import MeasureArgs
 import privacykpis.environments.macos
 
 
-def launch_browser(args: Args):
-    less_privileged_user = os.getlogin()
+def launch_browser(args: MeasureArgs):
     args = [
-        # noop when not running as root / sudo.
-        "sudo", "-u", less_privileged_user,
         args.binary,
         "--user-data-dir=" + args.profile_path,
         args.url
@@ -18,7 +15,7 @@ def launch_browser(args: Args):
     return subprocess.Popen(args)
 
 
-def close_browser(args: Args, browser_handle):
+def close_browser(args: MeasureArgs, browser_handle):
     browser_handle.terminate()
 
 
