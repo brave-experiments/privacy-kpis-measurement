@@ -4,14 +4,16 @@ import shutil
 import subprocess
 import time
 
-from xvfbwrapper import Xvfb
-
 from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
 import privacykpis.environments.default
 
 
 def launch_browser(args: MeasureArgs):
+    # Sneak this in here because there are problems running Xvfb
+    # as sudo, and sudo is needed for the *_env functions.
+    from xvfbwrapper import Xvfb
+
     # Check to see if we need to copy the default firefox profile over to
     # wherever we're running from.
     if not pathlib.Path(args.profile_path).is_dir():
