@@ -3,8 +3,6 @@ from pathlib import Path
 import subprocess
 import time
 
-from xvfbwrapper import Xvfb
-
 from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import LEAF_CERT, CHROMIUM_POLICY_PATH
 
@@ -14,6 +12,10 @@ POLICIES_FILE_PATH = POLICIES_DIR_PATH / Path("recommended_policies.json")
 
 
 def launch_browser(args: MeasureArgs):
+    # Sneak this in here because there are problems running Xvfb
+    # as sudo, and sudo is needed for the *_env functions.
+    from xvfbwrapper import Xvfb
+
     args = [
         args.binary,
         "--user-data-dir=" + args.profile_path,
