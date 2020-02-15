@@ -67,7 +67,7 @@ class ConfigArgs(Args):
     def __init__(self, args):
         self.is_valid = False
 
-        if not args.install or not args.uninstall:
+        if not args.install and not args.uninstall:
             err("Must select either 'install' or 'uninstall'")
             return
 
