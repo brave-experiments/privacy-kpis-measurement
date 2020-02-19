@@ -110,7 +110,7 @@ class MeasureArgs(Args):
             self.profile_path = args.profile_path
         else:  # chrome case
             if not validate_chrome(args):
-                return False
+                return
             self.case = args.case
             self.profile_path = args.profile_path
             self.binary = args.binary

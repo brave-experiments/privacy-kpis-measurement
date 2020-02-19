@@ -1,14 +1,18 @@
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import time
 
 from privacykpis.args import MeasureArgs, ConfigArgs
-from privacykpis.consts import LEAF_CERT, CHROMIUM_POLICY_PATH
+from privacykpis.consts import LEAF_CERT
 
 
 POLICIES_DIR_PATH = Path("/etc/opt/chrome/policies/recommended")
 POLICIES_FILE_PATH = POLICIES_DIR_PATH / Path("recommended_policies.json")
+
+USER_CERT_DB_PATH = Path.home() / Path(".pki/nssdb")
+USER_CERT_DB = "sql:{}".format(str(USER_CERT_DB_PATH))
 
 
 def launch_browser(args: MeasureArgs):
@@ -19,7 +23,7 @@ def launch_browser(args: MeasureArgs):
     args = [
         args.binary,
         "--user-data-dir=" + args.profile_path,
-        "--proxy-server='{}:{}'".format(args.proxy_host, args.proxy_port),
+        "--proxy-server={}:{}".format(args.proxy_host, args.proxy_port),
         args.url
     ]
     xvfb_handle = Xvfb()
@@ -34,22 +38,23 @@ def close_browser(args: MeasureArgs, browser_info):
 
 
 def setup_env(args: ConfigArgs):
-    if not POLICIES_DIR_PATH.is_dir():
-        POLICIES_DIR_PATH.mkdir(parents=True, exist_ok=True)
-
-    if not POLICIES_FILE_PATH.is_file():
-        POLICIES_FILE_PATH.write_text(CHROMIUM_POLICY_PATH.read_text())
+    target_user = os.getlogin()
+    setup_args = [
+        # Create the nssdb directory for this user.
+        ["mkdir", "-p", str(USER_CERT_DB_PATH)],
+        # Create an empty CA container / database.
+        ["certutil", "-N", "-d", USER_CERT_DB, "--empty-password"],
+        # Add the mitmproxy cert to the newly created database.
+        ["certutil", "-A", "-d", USER_CERT_DB, "-i", str(LEAF_CERT), "-n",
+            "mitmproxy", "-t", "TC,TC,TC"]
+    ]
+    sudo_prefix = ["sudo", "-u", target_user]
+    for args in setup_args:
+        subprocess.run(sudo_prefix + args)
 
 
 def teardown_env(args: ConfigArgs):
-    # Only remove the environment's chrome policy file if it 100% matches
-    # the one we installed in the first place.
-    if not POLICIES_FILE_PATH.is_file():
-        return
-
-    our_policy_text = CHROMIUM_POLICY_PATH.read_text()
-    current_policy_text = POLICIES_FILE_PATH.read_text()
-    if our_policy_text != current_policy_text:
-        return
-
-    POLICIES_FILE_PATH.unlink()
+    target_user = os.getlogin()
+    subprocess.run([
+        "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB, "-n",
+        "mitmproxy"])

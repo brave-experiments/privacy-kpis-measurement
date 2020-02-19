@@ -13,5 +13,3 @@ DEFAULT_FIREFOX_PROFILE = RESOURCES_PATH / Path("profiles/firefox")
 
 DEFAULT_PROXY_HOST = "127.0.0.1"
 DEFAULT_PROXY_PORT = 8888
-
-CHROMIUM_POLICY_PATH = RESOURCES_PATH / Path("policies/recommended_policies.json")

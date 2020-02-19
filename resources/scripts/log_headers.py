@@ -23,12 +23,15 @@ class HeaderLogger:
             json.dump(complete_log, h)
 
     def request(self, flow):
+        request_body = ""
+        if flow.request.content:
+            request_body = str(flow.request.get_text(strict=False))
         request_headers = [(k, v) for k, v in flow.request.headers.items()]
         log_data = {
           "url": flow.request.pretty_url,
           "headers": request_headers,
           "time": str(datetime.datetime.now()),
-          "body": flow.request.content,
+          "body": request_body,
         }
         self.requests.append(log_data)
 
