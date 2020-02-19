@@ -8,7 +8,6 @@ from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 
 import privacykpis.browsers.firefox_linux as firefox_linux_module
 import privacykpis.browsers.firefox_macos as firefox_macos_module
-import privacykpis.browsers.chrome_macos as chrome_macos_module
 import privacykpis.browsers.chrome_linux as chrome_linux_module
 import privacykpis.browsers.safari as safari_module
 
@@ -23,9 +22,7 @@ def module_for_args(args: Args):
         if is_mac:
             case_module = safari_module
     elif args.case == "chrome":
-        if is_mac:
-            case_module = chrome_macos_module
-        elif is_linux:
+        if is_linux:
             case_module = chrome_linux_module
     elif args.case == "firefox":
         if is_mac:
