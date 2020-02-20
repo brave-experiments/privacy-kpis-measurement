@@ -6,6 +6,7 @@ import time
 import getpass
 
 from privacykpis.args import MeasureArgs, ConfigArgs
+import privacykpis.common
 from privacykpis.consts import LEAF_CERT
 
 
@@ -39,7 +40,7 @@ def close_browser(args: MeasureArgs, browser_info):
 
 
 def setup_env(args: ConfigArgs):
-    target_user = getpass.getuser()
+    target_user = privacykpis.common.get_real_user()
     setup_args = [
         # Create the nssdb directory for this user.
         ["mkdir", "-p", str(USER_CERT_DB_PATH)],
@@ -55,7 +56,7 @@ def setup_env(args: ConfigArgs):
 
 
 def teardown_env(args: ConfigArgs):
-    target_user = getpass.getuser()
+    target_user = privacykpis.common.get_real_user()
     subprocess.run([
         "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB, "-n",
         "mitmproxy"])

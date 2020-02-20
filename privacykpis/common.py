@@ -1,5 +1,8 @@
 import json
+import os
+import pathlib
 import platform
+import pwd
 from subprocess import Popen, PIPE
 from time import sleep
 
@@ -10,6 +13,10 @@ import privacykpis.browsers.firefox_linux as firefox_linux_module
 import privacykpis.browsers.firefox_macos as firefox_macos_module
 import privacykpis.browsers.chrome_linux as chrome_linux_module
 import privacykpis.browsers.safari as safari_module
+
+
+def get_real_user():
+    return pathlib.Path.home().owner()
 
 
 def module_for_args(args: Args):
