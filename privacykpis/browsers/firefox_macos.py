@@ -20,7 +20,15 @@ def launch_browser(args: MeasureArgs):
         "--profile", args.profile_path,
         args.url
     ]
-    return subprocess.Popen(args)
+
+    if args.debug:
+        stdout_handle = None
+        stderr_handle = None
+    else:
+        stdout_handle = subprocess.DEVNULL
+        stderr_handle = subprocess.DEVNULL
+
+    return subprocess.Popen(args, stdout=stdout_handle, stderr=stderr_handle)
 
 
 def close_browser(args: MeasureArgs, browser_handle):

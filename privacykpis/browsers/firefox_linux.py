@@ -26,10 +26,24 @@ def launch_browser(args: MeasureArgs):
     ]
     xvfb_handle = Xvfb()
     xvfb_handle.start()
-    return [subprocess.Popen(args), xvfb_handle]
 
+    if args.debug:
+        stdout_handle = None
+        stderr_handle = None
+    else:
+        stdout_handle = subprocess.DEVNULL
+        stderr_handle = subprocess.DEVNULL
+
+    return [
+        subprocess.Popen(args, stdout=stdout_handle, stderr=stderr_handle),
+        xvfb_handle
+    ]
 
 def close_browser(args: MeasureArgs, browser_info):
+    subprocess.run([
+        "import", "-window", "root", "-crop", "978x597+0+95", "-quality", "90",
+        str(args.log_path) + ".json"
+    ])
     browser_handle, xvfb_handle = browser_info
     browser_handle.terminate()
     xvfb_handle.stop()

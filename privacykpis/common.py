@@ -57,7 +57,8 @@ def setup_proxy_for_url(args: MeasureArgs):
     ]
 
     proxy_handle = Popen(mitmdump_args, stderr=None)
-    print("Waiting 5 sec for mitmproxy to spin up...")
+    if args.debug:
+        print("Waiting 5 sec for mitmproxy to spin up...")
     sleep(5)
     if proxy_handle.poll() is not None:
         print("Something went sideways when running mitmproxy:")
@@ -68,7 +69,8 @@ def setup_proxy_for_url(args: MeasureArgs):
 
 
 def teardown_proxy(proxy_handle, args: MeasureArgs):
-    print("Shutting down, giving proxy time to write log")
+    if args.debug:
+        print("Shutting down, giving proxy time to write log")
     proxy_handle.terminate()
     proxy_handle.wait()
 
@@ -80,9 +82,11 @@ def record(args: MeasureArgs):
         return
 
     browser_info = case_module.launch_browser(args)
-    print("browser loaded, waiting {} secs".format(args.secs))
+    if args.debug:
+        print("browser loaded, waiting {} secs".format(args.secs))
     sleep(args.secs)
-    print("measurement complete, tearing down")
+    if args.debug:
+        print("measurement complete, tearing down")
     case_module.close_browser(args, browser_info)
 
     teardown_proxy(proxy_handle, args)

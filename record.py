@@ -25,6 +25,8 @@ PARSER.add_argument("--secs", default=30, type=int,
     help="Amount of time to allow the site to load for.")
 PARSER.add_argument("--binary",
     help="Path to the browser binary to use (required except for Safari).")
+PARSER.add_argument("--debug", action="store_true",
+    help="Include debugging information.")
 
 ARGS = privacykpis.args.MeasureArgs(PARSER.parse_args())
 if not ARGS.valid():

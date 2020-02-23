@@ -125,3 +125,4 @@ user_pref("toolkit.telemetry.cachedClientID", "d477340e-284a-c448-8ca5-94bd73a44
 user_pref("toolkit.telemetry.previousBuildID", "20200117190643");
 user_pref("toolkit.telemetry.reportingpolicy.firstRun", false);
 user_pref("trailhead.firstrun.didSeeAboutWelcome", true);
+user_pref("browser.sessionstore.resume_from_crash", false);

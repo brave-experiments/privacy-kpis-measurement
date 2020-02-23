@@ -127,3 +127,4 @@ class MeasureArgs(Args):
         self.proxy_port = str(args.proxy_port)
         self.log = args.log
         self.is_valid = True
+        self.is_debug = args.debug
