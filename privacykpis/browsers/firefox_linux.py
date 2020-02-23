@@ -19,7 +19,7 @@ def launch_browser(args: MeasureArgs):
     if not pathlib.Path(args.profile_path).is_dir():
         shutil.copytree(str(DEFAULT_FIREFOX_PROFILE), args.profile_path)
 
-    args = [
+    ff_args = [
         args.binary,
         "--profile", args.profile_path,
         args.url
@@ -35,7 +35,7 @@ def launch_browser(args: MeasureArgs):
         stderr_handle = subprocess.DEVNULL
 
     return [
-        subprocess.Popen(args, stdout=stdout_handle, stderr=stderr_handle),
+        subprocess.Popen(ff_args, stdout=stdout_handle, stderr=stderr_handle),
         xvfb_handle
     ]
 

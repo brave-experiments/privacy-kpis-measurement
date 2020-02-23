@@ -22,7 +22,7 @@ def launch_browser(args: MeasureArgs):
     # as sudo, and sudo is needed for the *_env functions.
     from xvfbwrapper import Xvfb
 
-    args = [
+    cr_args = [
         args.binary,
         "--user-data-dir=" + args.profile_path,
         "--proxy-server={}:{}".format(args.proxy_host, args.proxy_port),
@@ -39,7 +39,7 @@ def launch_browser(args: MeasureArgs):
         stderr_handle = subprocess.DEVNULL
 
     return [
-        subprocess.Popen(args, stdout=stdout_handle, stderr=stderr_handle),
+        subprocess.Popen(cr_args, stdout=stdout_handle, stderr=stderr_handle),
         xvfb_handle
     ]
 
