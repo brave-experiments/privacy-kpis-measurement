@@ -40,10 +40,11 @@ def launch_browser(args: MeasureArgs):
     ]
 
 def close_browser(args: MeasureArgs, browser_info):
-    subprocess.run([
-        "import", "-window", "root", "-crop", "978x597+0+95", "-quality", "90",
-        str(args.log_path) + ".json"
-    ])
+    if args.debug:
+        subprocess.run([
+            "import", "-window", "root", "-crop", "978x597+0+95", "-quality",
+            "90", str(args.log_path) + ".json"
+        ])
     browser_handle, xvfb_handle = browser_info
     browser_handle.terminate()
     xvfb_handle.stop()
