@@ -27,6 +27,10 @@ PARSER.add_argument("--binary",
     help="Path to the browser binary to use (required except for Safari).")
 PARSER.add_argument("--debug", action="store_true",
     help="Include debugging information.")
+PARSER.add_argument("--profile-template",
+    help="Nonstandard (i.e. including extensions) profile to use. Only works when\
+          the directory poitned to by --profile-path is empty. Should be path relative\
+          to privacykpis/resources.")
 
 ARGS = privacykpis.args.MeasureArgs(PARSER.parse_args())
 if not ARGS.valid():

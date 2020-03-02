@@ -116,8 +116,6 @@ class MeasureArgs(Args):
         else:  # chrome case
             self.case = args.case
             self.profile_path = args.profile_path
-            if os.path.islink(os.path.join(self.profile_path,"SingletonLock")):
-                os.unlink(os.path.join(self.profile_path,"SingletonLock"))
             if not args.binary:
                 self.binary = DEFAULT_LOCATIONS["chrome"]
             else:

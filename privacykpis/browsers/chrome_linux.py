@@ -1,11 +1,13 @@
 import os
 from pathlib import Path
+import pathlib
 import shutil
 import subprocess
 import time
 import getpass
 
 from privacykpis.args import MeasureArgs, ConfigArgs
+from privacykpis.consts import RESOURCES_PATH
 import privacykpis.common
 from privacykpis.consts import LEAF_CERT
 
@@ -21,6 +23,17 @@ def launch_browser(args: MeasureArgs):
     # Sneak this in here because there are problems running Xvfb
     # as sudo, and sudo is needed for the *_env functions.
     from xvfbwrapper import Xvfb
+
+    # Check to see if we need to copy the specialized profile over to
+    # wherever we're storing the actively used profile.
+    if args.profile_template and not pathlib.Path(args.profile_path).is_dir():
+        profile_template = RESOURCES_PATH / args.profile_template
+        if not pathlib.Path(profile_template).is_dir():
+            print("invalid profile template path: {}".format(profile_template))
+        shutil.copytree(str(profile_template), args.profile_path)
+
+    if os.path.islink(os.path.join(args.profile_path,"SingletonLock")):
+        os.unlink(os.path.join(args.profile_path,"SingletonLock"))
 
     cr_args = [
         args.binary,
