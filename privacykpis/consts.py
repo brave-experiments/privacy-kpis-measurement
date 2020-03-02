@@ -11,7 +11,7 @@ LOG_HEADERS_SCRIPT_PATH = RESOURCES_PATH / Path("scripts", "log_headers.py")
 
 DEFAULT_FIREFOX_PROFILE = RESOURCES_PATH / Path("profiles/firefox")
 
-DEFAULT_PROFILE_PATH = '/tmp/profile/'
+DEFAULT_PROFILE_PATH = '/tmp/profiles/default'
 DEFAULT_LOG_PATH = '/tmp/logs/log.json'
 
 DEFAULT_LOCATIONS = {"chrome": "/usr/bin/chromium-browser",

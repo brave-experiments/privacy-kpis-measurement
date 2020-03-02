@@ -22,7 +22,7 @@ WORKDIR /home/scraper
 
 COPY --chown=scraper . /app
 
-RUN mkdir /tmp/logs
+RUN mkdir /tmp/profiles && chown -R scraper /tmp/profiles
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
