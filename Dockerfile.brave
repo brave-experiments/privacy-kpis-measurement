@@ -1,0 +1,5 @@
+FROM kaytwo/privacykpis:base
+
+RUN sudo /app/environment.py --install --case chrome
+
+ENTRYPOINT ["/app/record.py","--profile-path","/tmp/profiles/brave","--case","chrome","--secs","10","--log","-","--binary","/usr/bin/brave-browser","--url"]
