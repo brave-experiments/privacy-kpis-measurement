@@ -1,0 +1,5 @@
+FROM privacykpis:base
+
+RUN sudo /app/environment.py --install --case firefox
+
+ENTRYPOINT ["/app/record.py","--case","firefox","--log","-","--url"]

@@ -5,19 +5,19 @@ import sys
 import privacykpis.args
 import privacykpis.common
 from privacykpis.consts import SUPPORTED_BROWSERS
-from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT
+from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT, DEFAULT_PROFILE_PATH, DEFAULT_LOG_PATH
 
 
 PARSER = argparse.ArgumentParser(description="Record HTTP request headers.")
 PARSER.add_argument("--url", required=True,
     help="The URL to record the resulting network traffic of.")
-PARSER.add_argument("--log", required=True,
+PARSER.add_argument("--log", default=DEFAULT_LOG_PATH,
     help="The path to record network traffic to, as a JSON text.")
 PARSER.add_argument("--proxy-host", default=DEFAULT_PROXY_HOST,
     help="The host to use when launching mitmproxy (not supported with Firefox).")
 PARSER.add_argument("--proxy-port", default=DEFAULT_PROXY_PORT, type=int,
     help="The port to use when launching mitmproxy (not supported with Firefox).")
-PARSER.add_argument("--profile-path",
+PARSER.add_argument("--profile-path", default=DEFAULT_PROFILE_PATH,
     help="Path to the browser profile to use (required except for Safari).")
 PARSER.add_argument("--case", required=True, choices=SUPPORTED_BROWSERS,
     help="Which browser condition to test.")

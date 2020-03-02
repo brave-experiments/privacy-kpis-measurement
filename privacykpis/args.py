@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
 from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT
-
+from privacykpis.consts import DEFAULT_LOCATIONS
 
 def err(msg):
     print(msg, file=sys.stderr)
@@ -103,17 +103,25 @@ class MeasureArgs(Args):
             self.profile_path = None
             self.binary = "/Applications/Safari.app"
         elif args.case == "firefox":
-            if not validate_firefox(args):
-                return
             self.case = "firefox"
-            self.binary = args.binary
+            if not args.binary:
+                self.binary = DEFAULT_LOCATIONS["firefox"]
+            else:
+                self.binary = args.binary
             self.profile_path = args.profile_path
-        else:  # chrome case
-            if not validate_chrome(args):
+            self.proxy_host = args.proxy_host
+            self.proxy_port = args.proxy_port
+            if not validate_firefox(self):
                 return
+        else:  # chrome case
             self.case = args.case
             self.profile_path = args.profile_path
-            self.binary = args.binary
+            if not args.binary:
+                self.binary = DEFAULT_LOCATIONS["chrome"]
+            else:
+                self.binary = args.binary
+            if not validate_chrome(self):
+                return
 
         is_root = os.geteuid() == 0
         if is_root:

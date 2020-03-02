@@ -1,0 +1,5 @@
+FROM privacykpis:base
+
+RUN sudo /app/environment.py --install --case chrome
+
+ENTRYPOINT ["/app/record.py","--case","chrome","--log","-","--url"]
