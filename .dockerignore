@@ -5,5 +5,5 @@ README.md
 requirements.txt
 Dockerfile*
 output
-profiles
+profiles**
 .vscode
