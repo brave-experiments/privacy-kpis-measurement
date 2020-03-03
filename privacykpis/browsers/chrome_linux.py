@@ -3,6 +3,7 @@ from pathlib import Path
 import pathlib
 import shutil
 import subprocess
+import tarfile
 import time
 import getpass
 
@@ -26,11 +27,11 @@ def launch_browser(args: MeasureArgs):
 
     # Check to see if we need to copy the specialized profile over to
     # wherever we're storing the actively used profile.
-    if args.profile_template and not pathlib.Path(args.profile_path).is_dir():
+    if hasattr(args,"profile_template") and not pathlib.Path(args.profile_path).is_dir():
         profile_template = RESOURCES_PATH / args.profile_template
-        if not pathlib.Path(profile_template).is_dir():
-            print("invalid profile template path: {}".format(profile_template))
-        shutil.copytree(str(profile_template), args.profile_path)
+        subprocess.run(["mkdir","-p",str(args.profile_path)])
+        with tarfile.open(profile_template) as tf:
+            tf.extractall(args.profile_path)
 
     if os.path.islink(os.path.join(args.profile_path,"SingletonLock")):
         os.unlink(os.path.join(args.profile_path,"SingletonLock"))

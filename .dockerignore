@@ -7,3 +7,4 @@ Dockerfile*
 output
 profiles**
 .vscode
+.git**

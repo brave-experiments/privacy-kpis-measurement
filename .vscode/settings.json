@@ -1,0 +1,11 @@
+{
+    "python.pythonPath": "/usr/bin/python3",
+    "files.watcherExclude": {
+        "profiles/**": true,
+        "output/**": true,
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true
+      }
+    
+}

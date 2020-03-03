@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
 from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT
-from privacykpis.consts import DEFAULT_LOCATIONS
+from privacykpis.consts import DEFAULT_LOCATIONS, RESOURCES_PATH
 
 def err(msg):
     print(msg, file=sys.stderr)
@@ -51,6 +51,12 @@ def validate_chrome(args):
     if not args.profile_path:
         err("no profile path provided")
         return False
+
+    if hasattr(args, "profile_template"):
+        fullpath = RESOURCES_PATH / args.profile_template
+        if not pathlib.Path(fullpath).is_file():
+            err("invalid profile template path: {}".format(fullpath))
+            return False
 
     if not pathlib.Path(args.binary).is_file():
         err(args.binary + " is not a file")
