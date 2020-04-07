@@ -128,3 +128,12 @@ class MeasureArgs(Args):
         self.log = args.log
         self.debug = args.debug
         self.is_valid = True
+
+
+class PersistArgs(Args):
+    def __init__(self, args):
+        self.is_valid = True
+        self.input = args.input
+        self.multi = args.multi
+        self.output = args.output
+        self.debug = args.debug
