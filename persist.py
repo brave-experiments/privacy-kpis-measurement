@@ -21,6 +21,10 @@ PARSER.add_argument("--output", required=True, type=writeable_path,
     help="Path to write the serialized graph to, in pickle format.")
 PARSER.add_argument("--debug", action="store_true",
     help="Print debugging information.")
+PARSER.add_argument("--format", default="pickle",
+    choices=privacykpis.persist.FORMATS.keys(),
+    help="Format to serialize graph into.")
+
 
 ARGS = privacykpis.args.PersistArgs(PARSER.parse_args())
 if not ARGS.valid():
@@ -28,4 +32,7 @@ if not ARGS.valid():
 
 GRAPH = privacykpis.persist.graph_from_args(ARGS)
 OUTPUT_FILE = sys.stdout if ARGS.output is None else ARGS.output
-write_gpickle(GRAPH, OUTPUT_FILE)
+PREPROCESS_FUNC, WRITE_FUNC = privacykpis.persist.FORMATS[ARGS.format]
+PROCESSED_GRAPH = PREPROCESS_FUNC(GRAPH)
+WRITE_FUNC(PROCESSED_GRAPH, OUTPUT_FILE)
+

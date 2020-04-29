@@ -137,3 +137,4 @@ class PersistArgs(Args):
         self.multi = args.multi
         self.output = args.output
         self.debug = args.debug
+        self.format = args.format

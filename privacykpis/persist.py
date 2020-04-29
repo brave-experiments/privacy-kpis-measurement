@@ -1,8 +1,10 @@
+import base64
 import datetime
 import json
 import pathlib
 from urllib.parse import urlparse
 
+import networkx
 from networkx import MultiDiGraph
 from publicsuffixlist import PublicSuffixList
 
@@ -67,3 +69,40 @@ class Request:
             "query tokens": self.query_tokens,
             "body tokens": self.body_tokens,
         })
+
+
+def graphml_preprocess(from_graph: MultiDiGraph) -> MultiDiGraph:
+    to_graph = MultiDiGraph()
+
+    for n, d in from_graph.nodes.data():
+        to_graph.add_node(n, **d)
+
+    token_keys = ["cookies", "path", "query", "body"]
+
+    for u, v, index, d in from_graph.edges(data=True, keys=True):
+        edge_data = {
+            "url": d["url"],
+            "timestamp": d["timestamp"],
+        }
+        for key_prefix in token_keys:
+            key_name = f"{key_prefix} tokens"
+            token_values = d[key_name]
+            if not token_values:
+                continue
+            for k, v in token_values:
+                edge_data_key = f"{key_prefix}:{k}"
+                edge_data[edge_data_key] = v
+        to_graph.add_edge(u, v, key=index)
+        to_graph.edges[u, v, index].update(edge_data)
+    return to_graph
+
+
+def pickle_preprocess(graph: MultiDiGraph) -> MultiDiGraph:
+    return graph
+
+
+FORMATS = {
+    "graphml": (graphml_preprocess, networkx.write_graphml),
+    "pickle": (pickle_preprocess, networkx.write_gpickle),
+}
+
