@@ -1,7 +1,8 @@
 import subprocess
 
-from privacykpis.args import ConfigArgs
-from privacykpis.consts import LEAF_CERT
+import privacykpis.consts
+import privacykpis.environment
+
 
 TRUSTED_SHELL_KARGS = dict(
     shell=True, check=True, capture_output=True, text=True)
@@ -9,11 +10,11 @@ SYS_KEYCHAIN = "/Library/Keychains/System.keychain"
 SUDO_NETWORK_STUB = ["sudo", "networksetup"]
 
 
-def stdout_of_trusted_shell_cmd(cmd):
+def stdout_of_trusted_shell_cmd(cmd) -> str:
     return subprocess.run(cmd, **TRUSTED_SHELL_KARGS).stdout.strip()
 
 
-def get_default_network_service():
+def get_default_network_service() -> str:
     default_net_piped_cmds = [
         "route -n get default",
         "grep interface",
@@ -33,7 +34,7 @@ def get_default_network_service():
     return default_net_service
 
 
-def setup_env(args: ConfigArgs):
+def setup_env(args: privacykpis.environment.Args) -> None:
     default_net_service = get_default_network_service()
     configure_proxy_cmds = [
         ["-setwebproxy", default_net_service, args.proxy_host,
@@ -52,11 +53,11 @@ def setup_env(args: ConfigArgs):
 
     trust_cert_cmd = [
         "sudo", "security", "add-trusted-cert", "-d", "-r",
-        "trustRoot", "-k", SYS_KEYCHAIN, LEAF_CERT]
+        "trustRoot", "-k", SYS_KEYCHAIN, privacykpis.consts.LEAF_CERT]
     subprocess.run(trust_cert_cmd, check=True)
 
 
-def teardown_env(args: ConfigArgs):
+def teardown_env(args: privacykpis.environment.Args) -> None:
     default_net_service = get_default_network_service()
     configure_proxy_cmds = [
         ["-setwebproxy", default_net_service, "''", "''"],

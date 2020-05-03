@@ -1,21 +1,19 @@
-import os
 import subprocess
-import time
 
-from privacykpis.args import MeasureArgs
+import privacykpis.common
 import privacykpis.environments.macos
+import privacykpis.record
 
 
-def launch_browser(args: MeasureArgs):
-    less_privileged_user = os.getlogin()
-    args = [
-        "open", args.url, "-g", "-a", args.binary]
+def launch_browser(args: privacykpis.record.Args):
+    less_privileged_user = privacykpis.common.get_real_user()
+    args = ["open", args.url, "-g", "-a", args.binary]
     subprocess.run(args, check=True)
     return None
 
 
-def close_browser(args: MeasureArgs, browser_handle):
-    less_privileged_user = os.getlogin()
+def close_browser(args: privacykpis.record.Args, browser_handle):
+    less_privileged_user = privacykpis.common.get_real_user()
     args = ["killall", "-u", less_privileged_user, "Safari"]
     subprocess.run(args, check=True)
 

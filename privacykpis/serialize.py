@@ -1,3 +1,4 @@
+import argparse
 import base64
 import datetime
 import json
@@ -8,11 +9,21 @@ import networkx
 from networkx import MultiDiGraph
 from publicsuffixlist import PublicSuffixList
 
-from privacykpis.args import PersistArgs
+import privacykpis.args
 import privacykpis.tokenizing
 
 
-def graph_from_args(args: PersistArgs) -> MultiDiGraph:
+class Args(privacykpis.args.Args):
+    def __init__(self, args: argparse.Namespace):
+        super().__init__(args)
+        self.is_valid = True
+        self.input = args.input
+        self.multi = args.multi
+        self.output = args.output
+        self.format = args.format
+
+
+def graph_from_args(args: Args) -> MultiDiGraph:
     graph = MultiDiGraph()
     for input_file in args.input:
         if args.multi:
@@ -105,4 +116,3 @@ FORMATS = {
     "graphml": (graphml_preprocess, networkx.write_graphml),
     "pickle": (pickle_preprocess, networkx.write_gpickle),
 }
-

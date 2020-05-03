@@ -1,15 +1,14 @@
-import os
 import pathlib
 import shutil
 import subprocess
-import time
 
-from privacykpis.args import MeasureArgs, ConfigArgs
-from privacykpis.consts import DEFAULT_FIREFOX_PROFILE
-import privacykpis.environments.default
+import privacykpis.common
+import privacykpis.consts
+import privacykpis.environment.default as default
+import privacykpis.record
 
 
-def launch_browser(args: MeasureArgs):
+def launch_browser(args: privacykpis.record.Args):
     # Sneak this in here because there are problems running Xvfb
     # as sudo, and sudo is needed for the *_env functions.
     from xvfbwrapper import Xvfb
@@ -17,7 +16,8 @@ def launch_browser(args: MeasureArgs):
     # Check to see if we need to copy the default firefox profile over to
     # wherever we're running from.
     if not pathlib.Path(args.profile_path).is_dir():
-        shutil.copytree(str(DEFAULT_FIREFOX_PROFILE), args.profile_path)
+        shutil.copytree(str(privacykpis.consts.DEFAULT_FIREFOX_PROFILE),
+                        args.profile_path)
 
     ff_args = [
         args.binary,
@@ -39,7 +39,8 @@ def launch_browser(args: MeasureArgs):
         xvfb_handle
     ]
 
-def close_browser(args: MeasureArgs, browser_info):
+
+def close_browser(args: privacykpis.record.Args, browser_info):
     if args.debug:
         subprocess.run([
             "import", "-window", "root", "-crop", "978x597+0+95", "-quality",
@@ -50,5 +51,5 @@ def close_browser(args: MeasureArgs, browser_info):
     xvfb_handle.stop()
 
 
-setup_env = privacykpis.environments.default.setup_env
-teardown_env = privacykpis.environments.default.teardown_env
+setup_env = default.setup_env
+teardown_env = default.teardown_env

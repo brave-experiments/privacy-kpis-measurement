@@ -1,23 +1,17 @@
-import os
 from pathlib import Path
-import shutil
 import subprocess
-import time
-import getpass
 
-from privacykpis.args import MeasureArgs, ConfigArgs
 import privacykpis.common
-from privacykpis.consts import LEAF_CERT
+import privacykpis.consts
+import privacykpis.environment
+import privacykpis.record
 
-
-POLICIES_DIR_PATH = Path("/etc/opt/chrome/policies/recommended")
-POLICIES_FILE_PATH = POLICIES_DIR_PATH / Path("recommended_policies.json")
 
 USER_CERT_DB_PATH = Path.home() / Path(".pki/nssdb")
 USER_CERT_DB = "sql:{}".format(str(USER_CERT_DB_PATH))
 
 
-def launch_browser(args: MeasureArgs):
+def launch_browser(args: privacykpis.record.Args):
     # Sneak this in here because there are problems running Xvfb
     # as sudo, and sudo is needed for the *_env functions.
     from xvfbwrapper import Xvfb
@@ -44,7 +38,7 @@ def launch_browser(args: MeasureArgs):
     ]
 
 
-def close_browser(args: MeasureArgs, browser_info):
+def close_browser(args: privacykpis.record.Args, browser_info):
     if args.debug:
         subprocess.run([
             "import", "-window", "root", "-crop", "978x597+0+95", "-quality",
@@ -55,7 +49,7 @@ def close_browser(args: MeasureArgs, browser_info):
     xvfb_handle.stop()
 
 
-def setup_env(args: ConfigArgs):
+def setup_env(args: privacykpis.environment.Args):
     target_user = privacykpis.common.get_real_user()
     setup_args = [
         # Create the nssdb directory for this user.
@@ -63,15 +57,16 @@ def setup_env(args: ConfigArgs):
         # Create an empty CA container / database.
         ["certutil", "-N", "-d", USER_CERT_DB, "--empty-password"],
         # Add the mitmproxy cert to the newly created database.
-        ["certutil", "-A", "-d", USER_CERT_DB, "-i", str(LEAF_CERT), "-n",
-            "mitmproxy", "-t", "TC,TC,TC"]
+        ["certutil", "-A", "-d", USER_CERT_DB, "-i",
+            str(privacykpis.consts.LEAF_CERT), "-n", "mitmproxy", "-t",
+            "TC,TC,TC"]
     ]
     sudo_prefix = ["sudo", "-u", target_user]
     for args in setup_args:
         subprocess.run(sudo_prefix + args)
 
 
-def teardown_env(args: ConfigArgs):
+def teardown_env(args: privacykpis.environment.Args):
     target_user = privacykpis.common.get_real_user()
     subprocess.run([
         "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB, "-n",

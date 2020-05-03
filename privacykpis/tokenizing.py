@@ -103,7 +103,8 @@ def kvs_from_json_str(body: str) -> Optional[KeyValueList]:
     return kvs
 
 
-def kvs_from_body(body_format: BodyDataEncoding, body: str) -> Optional[KeyValueList]:
+def kvs_from_body(body_format: BodyDataEncoding,
+                  body: str) -> Optional[KeyValueList]:
     if body_format == BodyDataEncoding.JSON:
         return kvs_from_json_str(body)
     if body_format == BodyDataEncoding.UNKNOWN:
