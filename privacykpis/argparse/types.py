@@ -4,7 +4,7 @@ import sys
 from typing import Optional
 
 
-def writeable_path(possible_path: Optional[str]) -> str:
+def writeable_path(possible_path: Optional[str]) -> Optional[pathlib.Path]:
     if possible_path is None:
         return possible_path
 

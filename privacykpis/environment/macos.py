@@ -4,14 +4,15 @@ import privacykpis.consts
 import privacykpis.environment
 
 
-TRUSTED_SHELL_KARGS = dict(
-    shell=True, check=True, capture_output=True, text=True)
 SYS_KEYCHAIN = "/Library/Keychains/System.keychain"
 SUDO_NETWORK_STUB = ["sudo", "networksetup"]
 
 
-def stdout_of_trusted_shell_cmd(cmd) -> str:
-    return subprocess.run(cmd, **TRUSTED_SHELL_KARGS).stdout.strip()
+def stdout_of_trusted_shell_cmd(cmd: str) -> str:
+    result = subprocess.run(cmd,
+                            shell=True, check=True, capture_output=True,
+                            text=True)
+    return result.stdout.strip()
 
 
 def get_default_network_service() -> str:
@@ -53,7 +54,7 @@ def setup_env(args: privacykpis.environment.Args) -> None:
 
     trust_cert_cmd = [
         "sudo", "security", "add-trusted-cert", "-d", "-r",
-        "trustRoot", "-k", SYS_KEYCHAIN, privacykpis.consts.LEAF_CERT]
+        "trustRoot", "-k", SYS_KEYCHAIN, str(privacykpis.consts.LEAF_CERT)]
     subprocess.run(trust_cert_cmd, check=True)
 
 

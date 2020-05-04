@@ -1,22 +1,21 @@
 import subprocess
 
 import privacykpis.common
-import privacykpis.environments.macos
+import privacykpis.browsers
+import privacykpis.environment.macos
 import privacykpis.record
+from privacykpis.record import RecordingHandles
 
 
-def launch_browser(args: privacykpis.record.Args):
-    less_privileged_user = privacykpis.common.get_real_user()
-    args = ["open", args.url, "-g", "-a", args.binary]
-    subprocess.run(args, check=True)
-    return None
+class Browser(privacykpis.browsers.Interface):
+    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+        less_privileged_user = privacykpis.common.get_real_user()
+        command = ["open", args.url, "-g", "-a", args.binary]
+        subprocess.run(command, check=True)
+        return RecordingHandles()
 
-
-def close_browser(args: privacykpis.record.Args, browser_handle):
-    less_privileged_user = privacykpis.common.get_real_user()
-    args = ["killall", "-u", less_privileged_user, "Safari"]
-    subprocess.run(args, check=True)
-
-
-setup_env = privacykpis.environments.macos.setup_env
-teardown_env = privacykpis.environments.macos.teardown_env
+    def close(self, args: privacykpis.record.Args,
+              browser_handle: RecordingHandles) -> None:
+        less_privileged_user = privacykpis.common.get_real_user()
+        command = ["killall", "-u", less_privileged_user, "Safari"]
+        subprocess.run(command, check=True)

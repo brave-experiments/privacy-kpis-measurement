@@ -2,6 +2,7 @@
 import argparse
 import sys
 
+from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT
 from privacykpis.consts import SUPPORTED_BROWSERS
 import privacykpis.environment
 
@@ -16,6 +17,13 @@ PARSER.add_argument("--case", required=True, choices=SUPPORTED_BROWSERS,
                     help="Which browser condition to test.")
 PARSER.add_argument("--debug", action="store_true",
                     help="Print debugging information.")
+PARSER.add_argument("--proxy-host", default=DEFAULT_PROXY_HOST,
+                    help="The host to use when launching mitmproxy (only "
+                    "used for MacOS).")
+PARSER.add_argument("--proxy-port", default=DEFAULT_PROXY_PORT, type=int,
+                    help="The port to use when launching mitmproxy (only "
+                    "used for MacOS).")
+
 
 ARGS = privacykpis.environment.Args(PARSER.parse_args())
 if not ARGS.valid():

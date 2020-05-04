@@ -6,5 +6,5 @@ class Args:
         self.is_valid = False
         self.debug = args.debug
 
-    def valid(self):
+    def valid(self) -> bool:
         return self.is_valid

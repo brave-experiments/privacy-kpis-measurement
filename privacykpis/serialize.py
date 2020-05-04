@@ -3,14 +3,18 @@ import base64
 import datetime
 import json
 import pathlib
+from typing import Any, Dict
 from urllib.parse import urlparse
 
-import networkx
+import networkx  # type: ignore
 from networkx import MultiDiGraph
-from publicsuffixlist import PublicSuffixList
+from publicsuffixlist import PublicSuffixList  # type: ignore
 
 import privacykpis.args
 import privacykpis.tokenizing
+
+
+RawRecord = Dict[str, Any]
 
 
 class Args(privacykpis.args.Args):
@@ -37,14 +41,14 @@ def graph_from_args(args: Args) -> MultiDiGraph:
 
 
 class SiteMeasurement:
-    def __init__(self, record: dict):
+    def __init__(self, record: RawRecord) -> None:
         self.start_timestamp = datetime.datetime.fromisoformat(record["start"])
         self.end_timestamp = datetime.datetime.fromisoformat(record["end"])
         self.url = record["url"]
         self.parsed_url = urlparse(record["url"])
         self.records = [Request(r) for r in record["requests"]]
 
-    def add_to_graph(self, graph: MultiDiGraph):
+    def add_to_graph(self, graph: MultiDiGraph) -> None:
         graph.add_node(self.url, type="site")
         for record in self.records:
             record.add_to_graph(self, graph)
@@ -58,19 +62,19 @@ class Request:
     """
     psl = PublicSuffixList()
 
-    def __init__(self, record: dict):
+    def __init__(self, record: RawRecord) -> None:
         tokens = privacykpis.tokenizing.from_record(record)
-        self.cookie_tokens = tokens["cookies"]
-        self.path_tokens = tokens["path"]
-        self.query_tokens = tokens["query"]
-        self.body_tokens = tokens["body"]
-        self.body_encoding = tokens["body encoding"]
+        self.cookie_tokens = tokens.cookies
+        self.path_tokens = tokens.path
+        self.query_tokens = tokens.query
+        self.body_tokens = tokens.body
+        self.body_encoding = tokens.body_encoding
         self.parsed_url = urlparse(record["url"])
         self.url = record["url"]
         self.etld_pone = self.psl.privatesuffix(self.parsed_url.netloc)
         self.timestamp = datetime.datetime.fromisoformat(record["time"])
 
-    def add_to_graph(self, site: SiteMeasurement, graph: MultiDiGraph):
+    def add_to_graph(self, site: SiteMeasurement, graph: MultiDiGraph) -> None:
         graph.add_node(self.etld_pone, type="requested etld+1")
         graph.add_edge(site.url, self.etld_pone, **{
             "url": self.url,

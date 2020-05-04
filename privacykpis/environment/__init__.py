@@ -24,11 +24,16 @@ class Args(privacykpis.args.Args):
         self.uninstall = args.uninstall
         self.install = args.install
         self.case = args.case
+
+        # These are only used for MacOS
+        self.proxy_port = args.proxy_port
+        self.proxy_host = args.proxy_host
+
         self.is_valid = True
 
 
-def configure(args: Args):
-    case_module = privacykpis.common.module_for_args(args)
+def configure(args: Args) -> None:
+    case_module = privacykpis.common.browser_for_args(args)
     if args.install:
         case_module.setup_env(args)
     else:  # uninstall path.

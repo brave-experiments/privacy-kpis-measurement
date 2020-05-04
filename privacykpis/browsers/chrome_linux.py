@@ -1,73 +1,76 @@
 from pathlib import Path
 import subprocess
+import typing
 
+import privacykpis.browsers
 import privacykpis.common
 import privacykpis.consts
 import privacykpis.environment
 import privacykpis.record
+from privacykpis.record import RecordingHandles
 
 
 USER_CERT_DB_PATH = Path.home() / Path(".pki/nssdb")
 USER_CERT_DB = "sql:{}".format(str(USER_CERT_DB_PATH))
 
 
-def launch_browser(args: privacykpis.record.Args):
-    # Sneak this in here because there are problems running Xvfb
-    # as sudo, and sudo is needed for the *_env functions.
-    from xvfbwrapper import Xvfb
+class Browser(privacykpis.browsers.Interface):
+    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+        # Sneak this in here because there are problems running Xvfb
+        # as sudo, and sudo is needed for the *_env functions.
+        from xvfbwrapper import Xvfb  # type: ignore
 
-    cr_args = [
-        args.binary,
-        "--user-data-dir=" + args.profile_path,
-        "--proxy-server={}:{}".format(args.proxy_host, args.proxy_port),
-        args.url
-    ]
-    xvfb_handle = Xvfb()
-    xvfb_handle.start()
+        cr_args = [
+            args.binary,
+            "--user-data-dir=" + args.profile_path,
+            "--proxy-server={}:{}".format(args.proxy_host, args.proxy_port),
+            args.url
+        ]
+        xvfb_handle = Xvfb()
+        xvfb_handle.start()
 
-    if args.debug:
-        stdout_handle = None
-        stderr_handle = None
-    else:
-        stdout_handle = subprocess.DEVNULL
-        stderr_handle = subprocess.DEVNULL
+        if args.debug:
+            stdout_handle = None
+            stderr_handle = None
+        else:
+            stdout_handle = subprocess.DEVNULL
+            stderr_handle = subprocess.DEVNULL
 
-    return [
-        subprocess.Popen(cr_args, stdout=stdout_handle, stderr=stderr_handle),
-        xvfb_handle
-    ]
+        browser_handle = subprocess.Popen(cr_args, stdout=stdout_handle,
+                                          stderr=stderr_handle,
+                                          universal_newlines=True)
+        return RecordingHandles(browser=browser_handle, xvfb=xvfb_handle)
 
+    def close(self, args: privacykpis.record.Args,
+              rec_handle: RecordingHandles) -> None:
+        if args.debug:
+            subprocess.run([
+                "import", "-window", "root", "-crop", "978x597+0+95",
+                "-quality", "90", str(args.log) + ".png"
+            ])
+        if rec_handle.browser:
+            rec_handle.browser.terminate()
+        if rec_handle.xvfb:
+            rec_handle.xvfb.stop()
 
-def close_browser(args: privacykpis.record.Args, browser_info):
-    if args.debug:
+    def setup_env(self, args: privacykpis.environment.Args) -> None:
+        target_user = privacykpis.common.get_real_user()
+        setup_args = [
+            # Create the nssdb directory for this user.
+            ["mkdir", "-p", str(USER_CERT_DB_PATH)],
+            # Create an empty CA container / database.
+            ["certutil", "-N", "-d", USER_CERT_DB, "--empty-password"],
+            # Add the mitmproxy cert to the newly created database.
+            ["certutil", "-A", "-d", USER_CERT_DB, "-i",
+                str(privacykpis.consts.LEAF_CERT), "-n", "mitmproxy", "-t",
+                "TC,TC,TC"]
+        ]
+        sudo_prefix = ["sudo", "-u", target_user]
+        for command in setup_args:
+            subprocess.run(sudo_prefix + command)
+
+    def teardown_env(self, args: privacykpis.environment.Args) -> None:
+        target_user = privacykpis.common.get_real_user()
         subprocess.run([
-            "import", "-window", "root", "-crop", "978x597+0+95", "-quality",
-            "90", str(args.log) + ".png"
-        ])
-    browser_handle, xvfb_handle = browser_info
-    browser_handle.terminate()
-    xvfb_handle.stop()
-
-
-def setup_env(args: privacykpis.environment.Args):
-    target_user = privacykpis.common.get_real_user()
-    setup_args = [
-        # Create the nssdb directory for this user.
-        ["mkdir", "-p", str(USER_CERT_DB_PATH)],
-        # Create an empty CA container / database.
-        ["certutil", "-N", "-d", USER_CERT_DB, "--empty-password"],
-        # Add the mitmproxy cert to the newly created database.
-        ["certutil", "-A", "-d", USER_CERT_DB, "-i",
-            str(privacykpis.consts.LEAF_CERT), "-n", "mitmproxy", "-t",
-            "TC,TC,TC"]
-    ]
-    sudo_prefix = ["sudo", "-u", target_user]
-    for args in setup_args:
-        subprocess.run(sudo_prefix + args)
-
-
-def teardown_env(args: privacykpis.environment.Args):
-    target_user = privacykpis.common.get_real_user()
-    subprocess.run([
-        "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB, "-n",
-        "mitmproxy"])
+            "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB,
+            "-n", "mitmproxy"])

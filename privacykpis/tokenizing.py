@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import http.cookies
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qsl, urlparse
 
 
@@ -11,7 +11,16 @@ class BodyDataEncoding(Enum):
     FORM_URL_ENC = 3
     FORM_MULTIPART = 4
 
+
 KeyValueList = List[Tuple[str, str]]
+
+
+class RecordParseResult:
+    cookies: Optional[KeyValueList] = None
+    path: Optional[KeyValueList] = None
+    query: Optional[KeyValueList] = None
+    body: Optional[KeyValueList] = None
+    body_encoding: BodyDataEncoding = BodyDataEncoding.UNKNOWN
 
 
 def guess_body_format(header_content_type: str) -> BodyDataEncoding:
@@ -26,20 +35,14 @@ def guess_body_format(header_content_type: str) -> BodyDataEncoding:
     return BodyDataEncoding.UNKNOWN
 
 
-def from_record(record: dict):
-    values = {
-        "cookies": None,
-        "path": None,
-        "query": None,
-        "body": None,
-        "body encoding": None,
-    }
+def from_record(record: Dict[str, Any]) -> RecordParseResult:
+    result = RecordParseResult()
 
     body_encoding = BodyDataEncoding.UNKNOWN
     for name, value in record["headers"]:
         lower_header = name.lower()
         if lower_header == "cookie":
-            values['cookies'] = kvs_from_cookies(value)
+            result.cookies = kvs_from_cookies(value)
             continue
         if lower_header == "content-type":
             body_encoding = guess_body_format(value)
@@ -47,19 +50,19 @@ def from_record(record: dict):
 
     parsed_url = urlparse(record["url"])
     if parsed_url.path:
-        values["path"] = kvs_from_url_path(parsed_url.path)
+        result.path = kvs_from_url_path(parsed_url.path)
 
     if parsed_url.query:
-        values["query"] = kvs_from_url_query(parsed_url.query)
+        result.query = kvs_from_url_query(parsed_url.query)
 
-    values["body"] = kvs_from_body(body_encoding, record["body"])
-    values["body encoding"] = body_encoding
-    return values
+    result.body = kvs_from_body(body_encoding, record["body"])
+    result.body_encoding = body_encoding
+    return result
 
 
 def kvs_from_cookies(cookie_header: str) -> KeyValueList:
     try:
-        cookies = http.cookies.SimpleCookie(cookie_header)
+        cookies: Any = http.cookies.SimpleCookie(cookie_header)
         return [(k, v.value) for k, v in cookies.items()]
     except http.cookies.CookieError:
         return []
@@ -83,7 +86,7 @@ def kvs_from_json_str(body: str) -> Optional[KeyValueList]:
     if json_data is None:
         return None
 
-    kvs = []
+    kvs: List[Tuple[str, str]] = []
 
     if type(json_data) is list:
         if len(json_data) == 0:
@@ -113,3 +116,4 @@ def kvs_from_body(body_format: BodyDataEncoding,
         return parse_qsl(body)
     if body_format == BodyDataEncoding.FORM_MULTIPART:
         return None
+    return None

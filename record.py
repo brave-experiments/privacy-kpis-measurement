@@ -14,11 +14,11 @@ PARSER.add_argument("--log", required=True,
                     help="The path to record network traffic to, as a "
                     "JSON text.")
 PARSER.add_argument("--proxy-host", default=DEFAULT_PROXY_HOST,
-                    help="The host to use when launching mitmproxy (not "
-                    "supported w/ Firefox).")
+                    help="The host to use when launching mitmproxy (only "
+                    "supported w/ Chrome).")
 PARSER.add_argument("--proxy-port", default=DEFAULT_PROXY_PORT, type=int,
-                    help="The port to use when launching mitmproxy (not "
-                    "supported w/ Firefox).")
+                    help="The port to use when launching mitmproxy (only "
+                    "supported w/ Chrome).")
 PARSER.add_argument("--profile-path",
                     help="Path to the browser profile to use (required except "
                     "for Safari).")

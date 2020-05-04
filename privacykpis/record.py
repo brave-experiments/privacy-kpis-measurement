@@ -3,16 +3,30 @@ import json
 import pathlib
 import subprocess
 import time
+from typing import AnyStr, Tuple, Optional, Union, Type
 import urllib.parse
+
+from xvfbwrapper import Xvfb  # type: ignore
 
 import privacykpis.args
 import privacykpis.common
+from privacykpis.common import err
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
 
 
-def validate_firefox(args):
+SubProc = subprocess.Popen[str]
+
+
+class RecordingHandles:
+    def __init__(self, browser: Optional[SubProc] = None,
+                 xvfb: Optional[Xvfb] = None) -> None:
+        self.browser = browser
+        self.xvfb = xvfb
+
+
+def validate_firefox(args: argparse.Namespace) -> bool:
     if not args.profile_path:
         err("no profile path provided")
         return False
@@ -24,7 +38,7 @@ def validate_firefox(args):
         return False
 
     if not pathlib.Path(args.binary).is_file():
-        err(args.binary + " is not a file")
+        err(f"{args.binary} is not a file")
         return False
 
     if args.proxy_host != DEFAULT_PROXY_HOST:
@@ -38,7 +52,7 @@ def validate_firefox(args):
     return True
 
 
-def validate_chrome(args):
+def validate_chrome(args: argparse.Namespace) -> bool:
     if not args.profile_path:
         privacykpis.common.err("no profile path provided")
         return False
@@ -63,7 +77,7 @@ class Args(privacykpis.args.Args):
 
         if args.case == "safari":
             self.case = "safari"
-            self.profile_path = None
+            self.profile_path = ""
             self.binary = "/Applications/Safari.app"
         elif args.case == "firefox":
             if not validate_firefox(args):
@@ -92,18 +106,19 @@ class Args(privacykpis.args.Args):
         self.is_valid = True
 
 
-def setup_proxy_for_url(args: Args):
+def setup_proxy_for_url(args: Args) -> Optional[SubProc]:
     mitmdump_args = [
         "mitmdump",
         "--listen-host", args.proxy_host,
         "--listen-port", args.proxy_port,
         "-s", str(LOG_HEADERS_SCRIPT_PATH),
-        "--set", "confdir=" + str(CERT_PATH),
+        "--set", f"confdir={CERT_PATH}",
         "-q",
         json.dumps(dict(privacy_kpis_url=args.url, privacy_kpis_log=args.log))
     ]
 
-    proxy_handle = subprocess.Popen(mitmdump_args, stderr=None)
+    proxy_handle = subprocess.Popen(mitmdump_args, stderr=None,
+                                    universal_newlines=True)
     if args.debug:
         print("Waiting 5 sec for mitmproxy to spin up...")
     time.sleep(5)
@@ -115,25 +130,25 @@ def setup_proxy_for_url(args: Args):
     return proxy_handle
 
 
-def teardown_proxy(proxy_handle, args: Args):
+def teardown_proxy(proxy_handle: SubProc, args: Args) -> None:
     if args.debug:
         print("Shutting down, giving proxy time to write log")
     proxy_handle.terminate()
     proxy_handle.wait()
 
 
-def run(args: Args):
-    case_module = privacykpis.common.module_for_args(args)
+def run(args: Args) -> None:
+    browser = privacykpis.common.browser_for_args(args)
     proxy_handle = setup_proxy_for_url(args)
     if proxy_handle is None:
         return
 
-    browser_info = case_module.launch_browser(args)
+    browser_info = browser.launch(args)
     if args.debug:
         print("browser loaded, waiting {} secs".format(args.secs))
-    sleep(args.secs)
+    time.sleep(args.secs)
     if args.debug:
         print("measurement complete, tearing down")
-    case_module.close_browser(args, browser_info)
+    browser.close(args, browser_info)
 
     teardown_proxy(proxy_handle, args)
