@@ -4,15 +4,19 @@ from privacykpis.record import RecordingHandles
 
 
 class Interface:
-    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+    @staticmethod
+    def launch(args: privacykpis.record.Args) -> RecordingHandles:
         return RecordingHandles()
 
-    def close(self, args: privacykpis.record.Args,
+    @staticmethod
+    def close(args: privacykpis.record.Args,
               rec_handle: RecordingHandles) -> None:
         pass
 
-    def setup_env(self, args: privacykpis.environment.Args) -> None:
+    @staticmethod
+    def setup_env(args: privacykpis.environment.Args) -> None:
         pass
 
-    def teardown_env(self, args: privacykpis.environment.Args) -> None:
+    @staticmethod
+    def teardown_env(args: privacykpis.environment.Args) -> None:
         pass

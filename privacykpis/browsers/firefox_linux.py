@@ -10,7 +10,8 @@ from privacykpis.record import RecordingHandles
 
 
 class Browser(privacykpis.browsers.Interface):
-    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+    @staticmethod
+    def launch(args: privacykpis.record.Args) -> RecordingHandles:
         # Sneak this in here because there are problems running Xvfb
         # as sudo, and sudo is needed for the *_env functions.
         from xvfbwrapper import Xvfb  # type: ignore
@@ -41,7 +42,8 @@ class Browser(privacykpis.browsers.Interface):
                                           universal_newlines=True)
         return RecordingHandles(browser=browser_handle, xvfb=xvfb_handle)
 
-    def close(self, args: privacykpis.record.Args,
+    @staticmethod
+    def close(args: privacykpis.record.Args,
               rec_handles: RecordingHandles) -> None:
         if args.debug:
             subprocess.run([

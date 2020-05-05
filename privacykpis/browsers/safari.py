@@ -8,13 +8,15 @@ from privacykpis.record import RecordingHandles
 
 
 class Browser(privacykpis.browsers.Interface):
-    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+    @staticmethod
+    def launch(args: privacykpis.record.Args) -> RecordingHandles:
         less_privileged_user = privacykpis.common.get_real_user()
         command = ["open", args.url, "-g", "-a", args.binary]
         subprocess.run(command, check=True)
         return RecordingHandles()
 
-    def close(self, args: privacykpis.record.Args,
+    @staticmethod
+    def close(args: privacykpis.record.Args,
               browser_handle: RecordingHandles) -> None:
         less_privileged_user = privacykpis.common.get_real_user()
         command = ["killall", "-u", less_privileged_user, "Safari"]

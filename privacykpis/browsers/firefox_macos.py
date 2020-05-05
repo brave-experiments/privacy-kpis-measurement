@@ -10,7 +10,8 @@ from privacykpis.record import RecordingHandles
 
 
 class Browser(privacykpis.browsers.Interface):
-    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+    @staticmethod
+    def launch(args: privacykpis.record.Args) -> RecordingHandles:
         # Check to see if we need to copy the default firefox profile over to
         # wherever we're running from.
         if not pathlib.Path(args.profile_path).is_dir():
@@ -35,7 +36,8 @@ class Browser(privacykpis.browsers.Interface):
                                           universal_newlines=True)
         return RecordingHandles(browser=browser_handle)
 
-    def close(self, args: privacykpis.record.Args,
+    @staticmethod
+    def close(args: privacykpis.record.Args,
               rec_handle: RecordingHandles) -> None:
         if rec_handle.browser:
             rec_handle.browser.terminate()

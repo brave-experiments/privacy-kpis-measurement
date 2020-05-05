@@ -95,7 +95,10 @@ def kvs_from_json_str(body: str) -> Optional[KeyValueList]:
             return kvs
         json_data = json_data[0]
 
-    if len(json_data.keys()) == 0:
+    try:
+        if len(json_data.keys()) == 0:
+            return None
+    except AttributeError:
         return None
 
     for key, value in json_data.items():

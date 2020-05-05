@@ -7,8 +7,8 @@ import privacykpis.stats
 
 PARSER = argparse.ArgumentParser(description="Extract statistics from "
                                  "serialized graphs.")
-PARSER.add_argument("--input", "-i", required=True, default=sys.stdin,
-                    type=argparse.FileType(encoding="utf-8"),
+PARSER.add_argument("--input", "-i",
+                    required=True, type=argparse.FileType(encoding="utf-8"),
                     help="Serialized networkx graph to extract statistics "
                     "from.")
 PARSER.add_argument("--control", "-c",
@@ -21,3 +21,5 @@ PARSER.add_argument("--debug", action="store_true",
 ARGS = privacykpis.stats.Args(PARSER.parse_args())
 if not ARGS.valid():
     sys.exit(-1)
+
+privacykpis.stats.measure(ARGS)

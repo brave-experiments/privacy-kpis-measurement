@@ -15,7 +15,8 @@ USER_CERT_DB = "sql:{}".format(str(USER_CERT_DB_PATH))
 
 
 class Browser(privacykpis.browsers.Interface):
-    def launch(self, args: privacykpis.record.Args) -> RecordingHandles:
+    @staticmethod
+    def launch(args: privacykpis.record.Args) -> RecordingHandles:
         # Sneak this in here because there are problems running Xvfb
         # as sudo, and sudo is needed for the *_env functions.
         from xvfbwrapper import Xvfb  # type: ignore
@@ -41,7 +42,8 @@ class Browser(privacykpis.browsers.Interface):
                                           universal_newlines=True)
         return RecordingHandles(browser=browser_handle, xvfb=xvfb_handle)
 
-    def close(self, args: privacykpis.record.Args,
+    @staticmethod
+    def close(args: privacykpis.record.Args,
               rec_handle: RecordingHandles) -> None:
         if args.debug:
             subprocess.run([
@@ -53,7 +55,8 @@ class Browser(privacykpis.browsers.Interface):
         if rec_handle.xvfb:
             rec_handle.xvfb.stop()
 
-    def setup_env(self, args: privacykpis.environment.Args) -> None:
+    @staticmethod
+    def setup_env(args: privacykpis.environment.Args) -> None:
         target_user = privacykpis.common.get_real_user()
         setup_args = [
             # Create the nssdb directory for this user.
@@ -69,7 +72,8 @@ class Browser(privacykpis.browsers.Interface):
         for command in setup_args:
             subprocess.run(sudo_prefix + command)
 
-    def teardown_env(self, args: privacykpis.environment.Args) -> None:
+    @staticmethod
+    def teardown_env(args: privacykpis.environment.Args) -> None:
         target_user = privacykpis.common.get_real_user()
         subprocess.run([
             "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB,

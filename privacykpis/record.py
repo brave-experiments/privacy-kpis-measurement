@@ -138,7 +138,7 @@ def teardown_proxy(proxy_handle: SubProc, args: Args) -> None:
 
 
 def run(args: Args) -> None:
-    browser = privacykpis.common.browser_for_args(args)
+    browser = privacykpis.common.browser_class(args)
     proxy_handle = setup_proxy_for_url(args)
     if proxy_handle is None:
         return
