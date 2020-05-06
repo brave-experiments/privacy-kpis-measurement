@@ -22,4 +22,4 @@ ARGS = privacykpis.stats.Args(PARSER.parse_args())
 if not ARGS.valid():
     sys.exit(-1)
 
-privacykpis.stats.measure(ARGS)
+privacykpis.stats.measure_samekey_difforigin(ARGS)
