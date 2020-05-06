@@ -30,16 +30,17 @@ def get_origins(input_graph: MultiDiGraph):
     return initOrigins
 
 def compare_pairs(fw,prev_qtokens:dict,tp:str) -> dict:
-    params = {}
+    keyvals = []
     for pp in prev_qtokens:
         if len(prev_qtokens[pp])>1:
             for arr in prev_qtokens[pp]:
-                fw.write(tp+"\t"+str(pp)+"\t"+arr[0]+"\t"+str(arr[1])+"\t"+arr[2]+"\n")
-                if str(pp) not in params:
-                    params[str(pp)] = []
-                params[str(pp)].append({"origin":arr[0],"cookies":arr[1],"timestamp":arr[2]})
-            return {"query_tokens": params}
-    return None
+                k,v=pp
+                fw.write(tp+"\t"+k+"\t"+v+"\t"+arr[0]+"\t"+str(arr[1])+"\t"+arr[2]+"\n")
+                keyvals.append({"key":k,"val":v,"origin":arr[0],"cookies":arr[1],"timestamp":arr[2]})
+    if len(keyvals)>0:
+        return keyvals
+    else:
+        return None
 
 def measure_samekey_difforigin(args: Args):
     filename = args.input.name.split(".")[0]
@@ -50,7 +51,7 @@ def measure_samekey_difforigin(args: Args):
         control_graph = read_gpickle(args.control)
     origins = get_origins(input_graph)
     fw=open(filename+"_results.tsv","w")
-    fw.write("third party\tquery token\torigin\tcookies\ttimestamp\n")
+    fw.write("third party\tkey\tvalue\torigin\tcookies\ttimestamp\n")
     for n, d in list(input_graph.nodes(data=True)):
         # get 3party only
         if  n == None or d["type"] == "site":
@@ -63,7 +64,7 @@ def measure_samekey_difforigin(args: Args):
                 for i in reqs:
                     if reqs[i]["query tokens"] == None:
                         continue
-                    #get qtokens for all origins associated to this 3party
+                    #get qtokens for all origins associated with this 3party
                     for pp in reqs[i]["query tokens"]:
                         cookies = reqs[i]["cookies tokens"]
                         timestamp = reqs[i]["timestamp"]
@@ -76,4 +77,3 @@ def measure_samekey_difforigin(args: Args):
     fw.close
     with open(filename+"_results.json","w") as fw:
         fw.write(json.dumps(results))
-    print(len(results))
