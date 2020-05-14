@@ -15,6 +15,9 @@ PARSER.add_argument("--control", "-c",
                     type=argparse.FileType(encoding="utf-8"),
                     help="If provided, used as the control crawl (to remove "
                     "non-identifying strings) when extracting statistics.")
+PARSER.add_argument("--format", "-f", default="json",
+                    choices=privacykpis.stats.FORMATS,
+                    help="Format to store output.")
 PARSER.add_argument("--debug", action="store_true",
                     help="Print debugging information.")
 

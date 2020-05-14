@@ -34,3 +34,4 @@ urwid==2.0.1
 Werkzeug==0.16.0
 wsproto==0.14.1
 zstandard==0.12.0
+numpy==1.15.4
