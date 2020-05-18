@@ -20,24 +20,27 @@ FORMATS = {"tsv", "json"}
 
 
 def __reidentifying_pairs(fw: Optional[Fpointers], ptokens: KeyPairsOrigins,
-                          tp: str, control_kp: Optional[KeyPairsOrigins]
+                          tp: str, control_kp: Optional[ReidentifyingOrgs]
                           ) -> Tuple[List[Dict[str, Any]], ReidentifyingOrgs]:
     keyvals = []
     reidentify: ReidentifyingOrgs = {}
     for k in ptokens:
         for obj in ptokens[k]:
             v = obj["val"]
-            print_KeyPair(fw, tp, k, v, obj["origin"], obj["token_type"],
+            origin = obj["origin"]
+            ttype = obj["token_type"]
+            print_KeyPair(fw, tp, k, v, origin, ttype,
                           obj["timestamp"])
-            keyvals.append({"key": k, "token_type": obj["token_type"],
+            keyvals.append({"key": k, "token_type": ttype,
                             "timestamp": obj["timestamp"], "val": v,
-                            "origin": obj["origin"]})
-            if k not in reidentify:
-                reidentify[k] = {}
-            if v not in reidentify[k]:
-                reidentify[k][v] = {"origins": [], "token_type": str}
-            reidentify[k][v]["origins"].append(obj["origin"])
-            reidentify[k][v]["token_type"] = obj["token_type"]
+                            "origin": origin})
+            if not kp_exists_in_control(control_kp, tp, k, v, origin, ttype):
+                if k not in reidentify:
+                    reidentify[k] = {}
+                if v not in reidentify[k]:
+                    reidentify[k][v] = {"origins": [], "token_type": str}
+                reidentify[k][v]["origins"].append(origin)
+                reidentify[k][v]["token_type"] = ttype
     return keyvals, reidentify
 
 
@@ -63,9 +66,10 @@ def __demul_token(o: str, req: Dict[str, Any], token_type: str,
 
 
 def __process_graph(fw: Optional[Fpointers], graph: MultiDiGraph, control_kp:
-                    Optional[KeyPairsOrigins]) -> KeyPairsOrigins:
+                    Optional[ReidentifyingOrgs_all]) -> ReidentifyingOrgs_all:
     origins = get_origins(graph)
     kp_all = {}
+    reident_all: ReidentifyingOrgs_all = {}
     for n, d in list(graph.nodes(data=True)):
         # get 3party only
         if n is None or d["type"] == "site":
@@ -80,22 +84,24 @@ def __process_graph(fw: Optional[Fpointers], graph: MultiDiGraph, control_kp:
                     keypairs_orgs = __get_keypairs(o, reqs[i], keypairs_orgs)
         (keyvals, reidentify) = __reidentifying_pairs(fw, keypairs_orgs, n,
                                                       control_kp)
-        print_reidentification(fw, reidentify, n)
         if len(keyvals) > 0:
             kp_all[n] = keyvals
-    return kp_all
+        reident_all[n] = reidentify
+    # better only on debug mode
+    print_json(fw, kp_all)
+    return reident_all
 
 
 def measure_samekey_difforigin(args: Args) -> None:
     fp: Fpointers = prepare_output(args.input.name, args.format)
     input_graph: MultiDiGraph = read_gpickle(args.input.name)
     control_graph: Optional[MultiDiGraph] = None
-    control_kp_all: Optional[KeyPairsOrigins] = None
+    ctrl_reidentifying_kp: Optional[ReidentifyingOrgs_all] = None
     if args.control:
         control_graph = read_gpickle(args.control.name)
         print("Processing graph from", args.control.name)
-        control_kp_all = __process_graph(None, control_graph, None)
+        ctrl_reidentifying_kp = __process_graph(None, control_graph, None)
     print("Processing graph from", args.input.name)
-    kp_all = __process_graph(fp, input_graph, control_kp_all)
-    print_json(fp, kp_all)
+    reidentifying_kp = __process_graph(fp, input_graph, ctrl_reidentifying_kp)
+    print_reidentification(fp, reidentifying_kp)
     closeFiles(fp)

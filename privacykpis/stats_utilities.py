@@ -7,6 +7,7 @@ import json
 
 KeyPairsOrigins = Dict[str, List[Dict[str, Any]]]
 ReidentifyingOrgs = Dict[str, Dict[str, Dict[str, Any]]]
+ReidentifyingOrgs_all = Dict[str, ReidentifyingOrgs]
 Fpointers = Dict[str, TextIO]
 DL = "\t"
 
@@ -35,20 +36,37 @@ def __get_filename(inputFile: str) -> str:
     return inputFile
 
 
-def print_reidentification(fw: Optional[Fpointers], reidentify:
-                           ReidentifyingOrgs, tp: str) -> None:
-    count = 0
-    for k in reidentify:
-        for v in reidentify[k]:
-            numSites = len(numpy.unique(reidentify[k][v]["origins"]))
-            if numSites > 1:
-                if fw is not None and "rid_ver_tsv" in fw:
-                    fw["rid_ver_tsv"].write(tp+DL+k+DL+v+DL+str(numSites)+DL +
-                                            reidentify[k][v]["token_type"] +
-                                            "\n")
-                count += numSites
-    if fw is not None and "rid_tsv" in fw:
-        fw["rid_tsv"].write(tp+"\t"+str(count)+"\n")
+def print_reidentification(fw: Optional[Fpointers], reidentify_all:
+                           ReidentifyingOrgs_all) -> None:
+    rid_sum = {}
+    printer_json: Dict[str, Dict[str, Any]] = {}
+    for tp in sorted(reidentify_all.keys()):
+        tp_reidentify = reidentify_all[tp]
+        count = 0
+        for k in tp_reidentify:
+            for v in tp_reidentify[k]:
+                nSites = len(numpy.unique(tp_reidentify[k][v]["origins"]))
+                if nSites > 1:
+                    ttype = tp_reidentify[k][v]["token_type"]
+                    # tsv case
+                    if fw is not None and "rid_ver_tsv" in fw:
+                        fw["rid_ver_tsv"].write(tp+DL+k+DL+v+DL+str(nSites) +
+                                                DL+ttype+"\n")
+                    if fw is not None and "rid_ver_json" in fw:
+                        if tp not in printer_json:
+                            printer_json[tp] = {}
+                        printer_json[tp] = ({"key": k, "value": v,
+                                             "token_type": ttype,
+                                             "sites_reidentifies": nSites})
+                    count += nSites
+        if fw is not None and "rid_tsv" in fw:
+            fw["rid_tsv"].write(tp+"\t"+str(count)+"\n")
+        rid_sum[tp] = {"num_of_sites_reidentifies": count}
+    # json case
+    if fw is not None and "rid_ver_json" in fw:
+        fw["rid_ver_json"].write(json.dumps(printer_json))
+    if fw is not None and "rid_json" in fw:
+        fw["rid_json"].write(json.dumps(rid_sum))
 
 
 def print_KeyPair(fw: Optional[Fpointers], tp: str, k: str, v: str, origin:
@@ -64,14 +82,17 @@ def prepare_output(inputFilename: str, outformat: str) -> Fpointers:
     if "tsv" in outformat:
         fw["kp_tsv"] = open(f'{filename}_keypairs.tsv', "w")
         fw["kp_tsv"].write(f'tpDomain{DL}key{DL}value{DL}origin{DL}token_typ' +
-                           'e{DL}timestamp\n')
+                           f'e{DL}timestamp\n')
         fw["rid_ver_tsv"] = open(filename+"_reidentification_verbose.tsv", "w")
         fw["rid_ver_tsv"].write(f'tpDomain{DL}key{DL}value{DL}sites_reident' +
-                                'ifies{DL}token_type\n')
+                                f'ifies{DL}token_type\n')
         fw["rid_tsv"] = open(f'{filename}_reidentification.tsv', "w")
         fw["rid_tsv"].write(f'tpDomain{DL}num_of_sites_reidentifies\n')
     else:
         fw["kp_json"] = open(f'{filename}_keypairs.json', "w")
+        fw["rid_ver_json"] = open(filename+"_reidentification_verbose.json",
+                                  "w")
+        fw["rid_json"] = open(f'{filename}_reidentification.json', "w")
     return fw
 
 
@@ -81,3 +102,17 @@ def closeFiles(files: Optional[Fpointers]) -> None:
     for k in files:
         if files[k] is not None:
             files[k].close
+
+
+def kp_exists_in_control(control_reid_all: Optional[ReidentifyingOrgs_all],
+                         this_tp: str,  this_k: str, this_v: str,
+                         this_org: str, this_ttype: str) -> bool:
+    if control_reid_all is None or this_tp not in control_reid_all:
+        return False
+    ctrl_kp = control_reid_all[this_tp]
+    if (this_k in ctrl_kp) and (this_v in ctrl_kp[this_k] and ctrl_kp
+                                [this_k][this_v]["token_type"] == this_ttype
+                                and this_org in ctrl_kp[this_k][this_v]
+                                ["origins"]):
+        return True
+    return False
