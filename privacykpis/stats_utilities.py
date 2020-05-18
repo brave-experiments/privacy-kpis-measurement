@@ -51,10 +51,11 @@ def print_reidentification(fw: Optional[Fpointers], reidentify_all:
                     # json case
                     if fw is not None and "rid_ver_json" in fw:
                         if tp not in printer_json:
-                            printer_json[tp] = {}
-                        printer_json[tp] = ({"key": k, "value": v,
-                                             "token_type": ttype,
-                                             "sites_reidentifies": nSites})
+                            printer_json[tp] = []
+                        printer_json[tp].append({"key": k, "value": v,
+                                                 "token_type": ttype,
+                                                 "sites_reidentifies": 
+                                                 nSites})
                     # tsv case
                     if fw is not None and "rid_ver_tsv" in fw:
                         fw["rid_ver_tsv"].write(tp+DL+k+DL+v+DL+str(nSites) +
