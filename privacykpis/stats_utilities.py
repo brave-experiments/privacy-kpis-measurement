@@ -48,16 +48,17 @@ def print_reidentification(fw: Optional[Fpointers], reidentify_all:
                 nSites = len(numpy.unique(tp_reidentify[k][v]["origins"]))
                 if nSites > 1:
                     ttype = tp_reidentify[k][v]["token_type"]
-                    # tsv case
-                    if fw is not None and "rid_ver_tsv" in fw:
-                        fw["rid_ver_tsv"].write(tp+DL+k+DL+v+DL+str(nSites) +
-                                                DL+ttype+"\n")
+                    # json case
                     if fw is not None and "rid_ver_json" in fw:
                         if tp not in printer_json:
                             printer_json[tp] = {}
                         printer_json[tp] = ({"key": k, "value": v,
                                              "token_type": ttype,
                                              "sites_reidentifies": nSites})
+                    # tsv case
+                    if fw is not None and "rid_ver_tsv" in fw:
+                        fw["rid_ver_tsv"].write(tp+DL+k+DL+v+DL+str(nSites) +
+                                                DL+ttype+"\n")
                     count += nSites
         if fw is not None and "rid_tsv" in fw:
             fw["rid_tsv"].write(tp+"\t"+str(count)+"\n")
