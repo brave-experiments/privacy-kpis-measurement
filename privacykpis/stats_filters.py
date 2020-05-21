@@ -12,31 +12,21 @@ def filter_length(k: str, v: str, token_type: str, filter_Val:
         return True
     return False
 
-
+# filter for ISO8601, RFC3339, RSS, W3C, ATOM, COOKIE, RFC2822, RFC850, RFC1036, RFC1123, RFC822 date formats
 def filter_dates(k: str, v: str, token_type: str, filter_Val: int) -> bool:
-    if _is_date(v) or _is_timestamp(v):
+    if _is_date(v):
         return True
     return False
 
 
 def _is_date(s: str) -> bool:
-    if len(s.replace(" ", "")) < 7:
+    if (s.count("-") < 2 and s.count("/") < 2 and s.count(":") <2) or len(s.replace(" ", "")) < 7:
         return False
     try:
         parse(s)
         return True
-
-    except ValueError:
+    except:
         return False
-
-
-def _is_timestamp(s: str) -> bool:
-    try:
-        print(time.strptime(s, '%H:%M:%S'))
-    except ValueError:
-        return False
-    else:
-        return True
 
 
 def filter_filetypes(k: str, v: str, token_type: str, filter_Val: int) -> bool:
@@ -44,7 +34,6 @@ def filter_filetypes(k: str, v: str, token_type: str, filter_Val: int) -> bool:
     if mimetype is None:
         return False
     else:
-        print(k, v, mimetype)
         return True
 
 
