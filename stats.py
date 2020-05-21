@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import sys
-
-import privacykpis.stats
+from privacykpis.stats import *
+from privacykpis.stats_utilities import check_positive
 
 
 PARSER = argparse.ArgumentParser(description="Extract statistics from "
@@ -20,9 +20,16 @@ PARSER.add_argument("--format", "-f", default="json",
                     help="Format to store output.")
 PARSER.add_argument("--debug", action="store_true",
                     help="Print debugging information.")
+PARSER.add_argument("--"+FILTER_PREFIX+"length", "-l", type=check_positive,
+                    help="Filter param values based on their length.")
+PARSER.add_argument("--"+FILTER_PREFIX+"filetypes", "-nf", action="store_true",
+                    help="Detect and filter out possible filenames with " +
+                    "known filetypes from param values.")
+PARSER.add_argument("--"+FILTER_PREFIX+"dates", "-nd", action="store_true",
+                    help="Detect and filter out possible date strings from " +
+                    "param values.")
 
 ARGS = privacykpis.stats.Args(PARSER.parse_args())
 if not ARGS.valid():
     sys.exit(-1)
-
 privacykpis.stats.measure_samekey_difforigin(ARGS)

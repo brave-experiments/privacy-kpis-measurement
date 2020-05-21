@@ -3,13 +3,21 @@ import networkx  # type: ignore
 from networkx import MultiDiGraph
 import numpy  # type: ignore
 import json
-
+import argparse
 
 KeyPairsOrigins = Dict[str, List[Dict[str, Any]]]
 ReidentifyingOrgs = Dict[str, Dict[str, Dict[str, Any]]]
 ReidentifyingOrgs_all = Dict[str, ReidentifyingOrgs]
 Fpointers = Dict[str, TextIO]
 DL = "\t"
+
+
+def check_positive(value: str) -> int:
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError(value+" is an invalid " +
+                                         "positive int value")
+    return ivalue
 
 
 def get_origins(input_graph: MultiDiGraph) -> List[str]:
@@ -39,7 +47,7 @@ def __get_filename(inputFile: str) -> str:
 def print_reidentification(fw: Optional[Fpointers], reidentify_all:
                            ReidentifyingOrgs_all) -> None:
     rid_sum = {}
-    printer_json: Dict[str, Dict[str, Any]] = {}
+    printer_json: Dict[str, Any] = {}
     for tp in sorted(reidentify_all.keys()):
         tp_reidentify = reidentify_all[tp]
         count = 0
@@ -54,7 +62,7 @@ def print_reidentification(fw: Optional[Fpointers], reidentify_all:
                             printer_json[tp] = []
                         printer_json[tp].append({"key": k, "value": v,
                                                  "token_type": ttype,
-                                                 "sites_reidentifies": 
+                                                 "sites_reidentifies":
                                                  nSites})
                     # tsv case
                     if fw is not None and "rid_ver_tsv" in fw:

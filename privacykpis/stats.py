@@ -5,6 +5,11 @@ from networkx import MultiDiGraph, read_gpickle
 from typing import TextIO, Dict, List, Optional, Tuple, Any
 import privacykpis.args
 from privacykpis.stats_utilities import *
+from privacykpis.stats_filters import *
+
+
+FORMATS = {"tsv", "json"}
+FILTER_PREFIX = "filter_"
 
 
 class Args(privacykpis.args.Args):
@@ -14,13 +19,15 @@ class Args(privacykpis.args.Args):
         self.control = args.control
         self.format = args.format
         self.is_valid = True
-
-
-FORMATS = {"tsv", "json"}
+        self.filters = {}
+        for argkey in args.__dict__.keys():
+            if FILTER_PREFIX in argkey:
+                self.filters[argkey] = args.__dict__[argkey]
 
 
 def __reidentifying_pairs(fw: Optional[Fpointers], ptokens: KeyPairsOrigins,
-                          tp: str, control_kp: Optional[ReidentifyingOrgs]
+                          tp: str, control_kp: Optional[ReidentifyingOrgs],
+                          filter: Optional[FiltersApplied]
                           ) -> Tuple[List[Dict[str, Any]], ReidentifyingOrgs]:
     keyvals = []
     reidentify: ReidentifyingOrgs = {}
@@ -34,13 +41,16 @@ def __reidentifying_pairs(fw: Optional[Fpointers], ptokens: KeyPairsOrigins,
             keyvals.append({"key": k, "token_type": ttype,
                             "timestamp": obj["timestamp"], "val": v,
                             "origin": origin})
+            # filter based on control graph
             if not kp_exists_in_control(control_kp, tp, k, v, origin, ttype):
-                if k not in reidentify:
-                    reidentify[k] = {}
-                if v not in reidentify[k]:
-                    reidentify[k][v] = {"origins": [], "token_type": str}
-                reidentify[k][v]["origins"].append(origin)
-                reidentify[k][v]["token_type"] = ttype
+                # filter based additional filters requested
+                if not apply_filters(k, v, ttype, filter):
+                    if k not in reidentify:
+                        reidentify[k] = {}
+                    if v not in reidentify[k]:
+                        reidentify[k][v] = {"origins": [], "token_type": str}
+                    reidentify[k][v]["origins"].append(origin)
+                    reidentify[k][v]["token_type"] = ttype
     return keyvals, reidentify
 
 
@@ -66,7 +76,8 @@ def __demul_token(o: str, req: Dict[str, Any], token_type: str,
 
 
 def __process_graph(fw: Optional[Fpointers], graph: MultiDiGraph, control_kp:
-                    Optional[ReidentifyingOrgs_all]) -> ReidentifyingOrgs_all:
+                    Optional[ReidentifyingOrgs_all], filter:
+                    Optional[FiltersApplied]) -> ReidentifyingOrgs_all:
     origins = get_origins(graph)
     kp_all = {}
     reident_all: ReidentifyingOrgs_all = {}
@@ -83,7 +94,7 @@ def __process_graph(fw: Optional[Fpointers], graph: MultiDiGraph, control_kp:
                     # get tokens for all origins associated with this 3party
                     keypairs_orgs = __get_keypairs(o, reqs[i], keypairs_orgs)
         (keyvals, reidentify) = __reidentifying_pairs(fw, keypairs_orgs, n,
-                                                      control_kp)
+                                                      control_kp, filter)
         if len(keyvals) > 0:
             kp_all[n] = keyvals
         reident_all[n] = reidentify
@@ -100,8 +111,10 @@ def measure_samekey_difforigin(args: Args) -> None:
     if args.control:
         control_graph = read_gpickle(args.control.name)
         print("Processing graph from", args.control.name)
-        ctrl_reidentifying_kp = __process_graph(None, control_graph, None)
+        ctrl_reidentifying_kp = __process_graph(None, control_graph, None,
+                                                args.filters)
     print("Processing graph from", args.input.name)
-    reidentifying_kp = __process_graph(fp, input_graph, ctrl_reidentifying_kp)
+    reidentifying_kp = __process_graph(fp, input_graph, ctrl_reidentifying_kp,
+                                       args.filters)
     print_reidentification(fp, reidentifying_kp)
     closeFiles(fp)
