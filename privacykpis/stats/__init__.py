@@ -14,6 +14,8 @@ from privacykpis.stats.utilities import prepare_output, print_json
 from privacykpis.stats.utilities import kp_exists_in_control, get_origins
 from privacykpis.stats.utilities import ReidentifyingOrgs, ReidentifyingOrgsAll
 from privacykpis.stats.utilities import ReportWriters, KeyPairsOrigins
+from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP, VALUE, KEY
+from privacykpis.consts import TYPE, SITE
 from privacykpis.tokenizing import TokenLocation
 from privacykpis.types import CSVWriter, RequestRec
 
@@ -54,18 +56,18 @@ def __reidentifying_pairs(fw: ReportWriters, ptokens: KeyPairsOrigins,
     keypair_writer = fw["kp_tsv"] if "fw" in fw else None
     for k in ptokens:
         for obj in ptokens[k]:
-            v = obj["val"]
-            origin = obj["origin"]
-            token_loc: TokenLocation = obj["token_loc"]
+            v = obj[VALUE]
+            orgn = obj[ORIGIN]
+            token_loc: TokenLocation = obj[TOKEN_LOCATION]
             if keypair_writer:
                 keypair_writer = cast(CSVWriter, keypair_writer)
-                print_keypair(keypair_writer, tp, k, v, origin, token_loc,
-                              obj["timestamp"])
-            keyvals.append({"key": k, "token_loc": token_loc,
-                            "timestamp": obj["timestamp"], "val": v,
-                            "origin": origin})
+                print_keypair(keypair_writer, tp, k, v, orgn, token_loc,
+                              obj[TIMESTAMP])
+            keyvals.append({KEY: k, TOKEN_LOCATION: token_loc,
+                            TIMESTAMP: obj[TIMESTAMP], VALUE: v,
+                            ORIGIN: orgn})
             # filter based on control graph
-            if kp_exists_in_control(control_kp, tp, k, v, origin, token_loc):
+            if kp_exists_in_control(control_kp, tp, k, v, orgn, token_loc):
                 continue
             # filter based additional filters requested
             if not should_include_token(k, v, token_loc, filters):
@@ -73,30 +75,23 @@ def __reidentifying_pairs(fw: ReportWriters, ptokens: KeyPairsOrigins,
             if k not in reidentify:
                 reidentify[k] = {}
             if v not in reidentify[k]:
-                reidentify[k][v] = {"origins": [], "token_loc": str}
-            reidentify[k][v]["origins"].append(origin)
-            reidentify[k][v]["token_loc"] = token_loc
+                reidentify[k][v] = {ORIGIN: [], TOKEN_LOCATION: str}
+            reidentify[k][v][ORIGIN].append(orgn)
+            reidentify[k][v][TOKEN_LOCATION] = token_loc
     return keyvals, reidentify
 
 
-def __get_keypairs(origin: str, req: RequestRec,
+def __get_keypairs(org: str, req: RequestRec,
                    kpairs: KeyPairsOrigins) -> KeyPairsOrigins:
     for token_location in TokenLocation:
-        kpairs = __demul_token(origin, req, token_location, kpairs)
-    return kpairs
-
-
-def __demul_token(origin: str, req: Dict[Union[str, TokenLocation], Any],
-                  token_loc: TokenLocation,
-                  kpairs: KeyPairsOrigins) -> KeyPairsOrigins:
-    tokens = req[token_loc]
-    if tokens is None:
-        return kpairs
-    for k, v in tokens:
-        if k not in kpairs:
-            kpairs[k] = []
-        kpairs[k].append({"origin": origin, "val": v, "token_loc": token_loc,
-                         "timestamp": req["timestamp"]})
+        tokens = req[token_location.name]
+        if tokens is None:
+            return kpairs
+        for k, v in tokens:
+            if k not in kpairs:
+                kpairs[k] = []
+            kpairs[k].append({ORIGIN: org, VALUE: v, TOKEN_LOCATION:
+                             token_location.name, TIMESTAMP: req[TIMESTAMP]})
     return kpairs
 
 
@@ -108,7 +103,7 @@ def __process_graph(fw: ReportWriters, graph: MultiDiGraph,
     reident_all: ReidentifyingOrgsAll = {}
     for n, d in graph.nodes(data=True):
         # get 3party only
-        if n is None or d["type"] == "site":
+        if n is None or d[TYPE] == SITE:
             continue
         keypairs_orgs: KeyPairsOrigins = {}
         for origin in graph.predecessors(n):

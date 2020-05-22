@@ -8,8 +8,9 @@ import warnings
 
 import privacykpis.common
 from privacykpis.tokenizing import TokenLocation, TokenKey, TokenValue
+from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP
+from privacykpis.consts import KEY, VALUE, TYPE, SITE
 from privacykpis.types import CSVWriter, RequestRec
-
 
 KeyPairsOrigins = Dict[str, List[RequestRec]]
 ReidentifyingOrgs = Dict[str, Dict[str, Dict[str, Any]]]
@@ -24,8 +25,9 @@ def get_origins(input_graph: MultiDiGraph) -> List[str]:
         # not sure why but there is None site in the trace
         # Pete: We should figure out what happened and not silently ignore :)
         if n is None or d is None:
-            warnings.warn("Something wrong happened? Node: "+str(n)+" "+str(d), ResourceWarning)
-        if d["type"] == "site":
+            warnings.warn("Something wrong happened? Node: "+str(n)+" "+str(d),
+                          ResourceWarning)
+        if d[TYPE] == SITE:
             init_origins.append(n)
     return init_origins
 
@@ -52,24 +54,24 @@ def print_reidentification(fw: ReportWriters,
     rid_json_writer = fw["rid_json"] if "rid_json" in fw else None
 
     for tp in sorted(reidentify_all.keys()):
-        tp_reidentify = reidentify_all[tp]
+        tp_reID = reidentify_all[tp]
         count = 0
-        for k in tp_reidentify:
-            for v in tp_reidentify[k]:
-                num_sites = len(set(tp_reidentify[k][v]["origins"]))
+        for k in tp_reID:
+            for v in tp_reID[k]:
+                num_sites = len(set(tp_reID[k][v][ORIGIN]))
                 if num_sites > 1:
-                    token_loc: TokenLocation = tp_reidentify[k][v]["token_loc"]
+                    tk_loc: TokenLocation = tp_reID[k][v][TOKEN_LOCATION]
                     # json case
                     if fw is not None and "rid_ver_json" in fw:
                         if tp not in printer_json:
                             printer_json[tp] = []
-                        printer_json[tp].append({"key": k, "value": v,
-                                                 "token_loc": token_loc,
+                        printer_json[tp].append({KEY: k, VALUE: v,
+                                                TOKEN_LOCATION: tk_loc,
                                                  "sites_reidentifies":
                                                  num_sites})
                     # tsv case
                     if rid_ver_writer:
-                        row = [tp, k, v, str(num_sites), str(token_loc)]
+                        row = [tp, k, v, str(num_sites), str(tk_loc)]
                         cast(CSVWriter, rid_ver_writer).writerow(row)
                     count += num_sites
         if rid_writer:
@@ -100,12 +102,12 @@ def prepare_output(filename: str, outformat: str) -> ReportWriters:
     base = get_filename(filename)
     writers: ReportWriters = {}
     if "tsv" in outformat:
-        keypairs_headers = ["tpDomain", "key", "value", "origin", "token_loc",
-                            "timestamp"]
+        keypairs_headers = ["tpDomain", KEY, VALUE, ORIGIN, TOKEN_LOCATION,
+                            TIMESTAMP]
         writers["kp_tsv"] = tsv_writer(f"{base}_keypairs", keypairs_headers)
 
-        ver_tsv_headers = ["tpDomain", "key", "value", "sites_reidentifies",
-                           "token_loc"]
+        ver_tsv_headers = ["tpDomain", KEY, VALUE, "sites_reidentifies",
+                           TOKEN_LOCATION]
         writers["rid_ver_tsv"] = tsv_writer(f"{base}_reidentification_verbose",
                                             ver_tsv_headers)
 
@@ -122,13 +124,13 @@ def prepare_output(filename: str, outformat: str) -> ReportWriters:
 
 def kp_exists_in_control(control_reid_all: Optional[ReidentifyingOrgsAll],
                          this_tp: str,  this_k: TokenKey, this_v: TokenValue,
-                         this_org: str, this_token_loc: TokenLocation) -> bool:
+                         this_org: str, this_tk_loc: TokenLocation) -> bool:
     if control_reid_all is None or this_tp not in control_reid_all:
         return False
     ctrl_kp = control_reid_all[this_tp]
     if (this_k in ctrl_kp) and (this_v in ctrl_kp[this_k] and ctrl_kp
-                                [this_k][this_v]["token_loc"] == this_token_loc
-                                and this_org in ctrl_kp[this_k][this_v]
-                                ["origins"]):
+                                [this_k][this_v][TOKEN_LOCATION] == this_tk_loc
+                                and this_org in ctrl_kp[this_k][this_v][ORIGIN]
+                                ):
         return True
     return False

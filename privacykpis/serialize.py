@@ -12,7 +12,7 @@ from publicsuffixlist import PublicSuffixList  # type: ignore
 
 import privacykpis.args
 from privacykpis.tokenizing import TokenLocation
-
+from privacykpis.consts import TIMESTAMP, URL, REQUESTED_ETLD1, SITE
 
 RawRecord = Dict[str, Any]
 
@@ -44,12 +44,12 @@ class SiteMeasurement:
     def __init__(self, record: RawRecord) -> None:
         self.start_timestamp = datetime.datetime.fromisoformat(record["start"])
         self.end_timestamp = datetime.datetime.fromisoformat(record["end"])
-        self.url = record["url"]
-        self.parsed_url = urlparse(record["url"])
+        self.url = record[URL]
+        self.parsed_url = urlparse(record[URL])
         self.records = [Request(r) for r in record["requests"]]
 
     def add_to_graph(self, graph: MultiDiGraph) -> None:
-        graph.add_node(self.url, type="site")
+        graph.add_node(self.url, type=SITE)
         for record in self.records:
             record.add_to_graph(self, graph)
 
@@ -69,16 +69,16 @@ class Request:
         self.query_tokens = tokens.query
         self.body_tokens = tokens.body
         self.body_encoding = tokens.body_encoding
-        self.parsed_url = urlparse(record["url"])
-        self.url = record["url"]
+        self.parsed_url = urlparse(record[URL])
+        self.url = record[URL]
         self.etld_pone = self.psl.privatesuffix(self.parsed_url.netloc)
         self.timestamp = datetime.datetime.fromisoformat(record["time"])
 
     def add_to_graph(self, site: SiteMeasurement, graph: MultiDiGraph) -> None:
-        graph.add_node(self.etld_pone, type="requested etld+1")
+        graph.add_node(self.etld_pone, type=REQUESTED_ETLD1)
         graph.add_edge(site.url, self.etld_pone, **{
-            "url": self.url,
-            "timestamp": self.timestamp.isoformat(),
+            URL: self.url,
+            TIMESTAMP: self.timestamp.isoformat(),
             TokenLocation.COOKIE.name: self.cookie_tokens,
             TokenLocation.PATH.name: self.path_tokens,
             TokenLocation.QUERY_PARAM.name: self.query_tokens,
@@ -94,8 +94,8 @@ def graphml_preprocess(from_graph: MultiDiGraph) -> MultiDiGraph:
 
     for u, v, index, d in from_graph.edges(data=True, keys=True):
         edge_data = {
-            "url": d["url"],
-            "timestamp": d["timestamp"],
+            URL: d[URL],
+            TIMESTAMP: d[TIMESTAMP],
         }
         for location in TokenLocation:
             token_values = d[location]
