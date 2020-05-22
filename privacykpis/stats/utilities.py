@@ -4,6 +4,7 @@ from typing import Any, cast, Dict, List, Optional, TextIO, Tuple, Union
 
 import networkx  # type: ignore
 from networkx import MultiDiGraph
+import warnings
 
 import privacykpis.common
 from privacykpis.tokenizing import TokenLocation, TokenKey, TokenValue
@@ -23,7 +24,7 @@ def get_origins(input_graph: MultiDiGraph) -> List[str]:
         # not sure why but there is None site in the trace
         # Pete: We should figure out what happened and not silently ignore :)
         if n is None or d is None:
-            raise ValueError("Something wrong happened? Node:", n, d)
+            warnings.warn("Something wrong happened? Node: "+str(n)+" "+str(d), ResourceWarning)
         if d["type"] == "site":
             init_origins.append(n)
     return init_origins

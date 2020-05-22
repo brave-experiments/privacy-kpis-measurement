@@ -79,10 +79,10 @@ class Request:
         graph.add_edge(site.url, self.etld_pone, **{
             "url": self.url,
             "timestamp": self.timestamp.isoformat(),
-            TokenLocation.COOKIE: self.cookie_tokens,
-            TokenLocation.PATH: self.path_tokens,
-            TokenLocation.QUERY_PARAM: self.query_tokens,
-            TokenLocation.BODY: self.body_tokens,
+            TokenLocation.COOKIE.name: self.cookie_tokens,
+            TokenLocation.PATH.name: self.path_tokens,
+            TokenLocation.QUERY_PARAM.name: self.query_tokens,
+            TokenLocation.BODY.name: self.body_tokens,
         })
 
 
