@@ -28,7 +28,7 @@ def dates(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
 
 def filetypes(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
     (mimetype, _) = mimetypes.guess_type(value)
-    return mimetype is not None
+    return mimetype is None
 
 
 def should_include_token(key: TokenKey, value: TokenValue,
