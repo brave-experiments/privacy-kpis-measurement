@@ -11,7 +11,7 @@ from networkx import MultiDiGraph
 from publicsuffixlist import PublicSuffixList  # type: ignore
 
 import privacykpis.args
-import privacykpis.tokenizing
+from privacykpis.tokenizing import TokenLocation
 
 
 RawRecord = Dict[str, Any]
@@ -79,10 +79,10 @@ class Request:
         graph.add_edge(site.url, self.etld_pone, **{
             "url": self.url,
             "timestamp": self.timestamp.isoformat(),
-            "cookies tokens": self.cookie_tokens,
-            "path tokens": self.path_tokens,
-            "query tokens": self.query_tokens,
-            "body tokens": self.body_tokens,
+            TokenLocation.COOKIE: self.cookie_tokens,
+            TokenLocation.PATH: self.path_tokens,
+            TokenLocation.QUERY_PARAM: self.query_tokens,
+            TokenLocation.BODY: self.body_tokens,
         })
 
 
@@ -92,20 +92,17 @@ def graphml_preprocess(from_graph: MultiDiGraph) -> MultiDiGraph:
     for n, d in from_graph.nodes.data():
         to_graph.add_node(n, **d)
 
-    token_keys = ["cookies", "path", "query", "body"]
-
     for u, v, index, d in from_graph.edges(data=True, keys=True):
         edge_data = {
             "url": d["url"],
             "timestamp": d["timestamp"],
         }
-        for key_prefix in token_keys:
-            key_name = f"{key_prefix} tokens"
-            token_values = d[key_name]
+        for location in TokenLocation:
+            token_values = d[location]
             if not token_values:
                 continue
             for k, v in token_values:
-                edge_data_key = f"{key_prefix}:{k}"
+                edge_data_key = f"{location}:{k}"
                 edge_data[edge_data_key] = v
         to_graph.add_edge(u, v, key=index)
         to_graph.edges[u, v, index].update(edge_data)
