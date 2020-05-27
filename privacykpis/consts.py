@@ -13,3 +13,13 @@ DEFAULT_FIREFOX_PROFILE = RESOURCES_PATH / Path("profiles/firefox")
 
 DEFAULT_PROXY_HOST = "127.0.0.1"
 DEFAULT_PROXY_PORT = 8888
+
+URL = "url"
+TIMESTAMP = "timestamp"
+ORIGIN = "origin"
+TOKEN_LOCATION = "token_location"
+KEY = "key"
+VALUE = "value"
+SITE = "site"
+REQUESTED_ETLD1 = "requested etld+1"
+TYPE = "type"

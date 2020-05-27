@@ -12,7 +12,16 @@ class BodyDataEncoding(Enum):
     FORM_MULTIPART = 4
 
 
-KeyValueList = List[Tuple[str, str]]
+class TokenLocation(Enum):
+    COOKIE = 1
+    PATH = 2
+    QUERY_PARAM = 3
+    BODY = 4
+
+
+TokenKey = str
+TokenValue = str
+KeyValueList = List[Tuple[TokenKey, TokenValue]]
 
 
 class RecordParseResult:
@@ -86,7 +95,7 @@ def kvs_from_json_str(body: str) -> Optional[KeyValueList]:
     if json_data is None:
         return None
 
-    kvs: List[Tuple[str, str]] = []
+    kvs: KeyValueList = []
 
     if type(json_data) is list:
         if len(json_data) == 0:

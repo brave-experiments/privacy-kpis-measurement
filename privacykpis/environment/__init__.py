@@ -1,6 +1,7 @@
 import argparse
 
 import privacykpis.args
+import privacykpis.browsers
 import privacykpis.common
 
 
@@ -33,7 +34,7 @@ class Args(privacykpis.args.Args):
 
 
 def configure(args: Args) -> None:
-    case_module = privacykpis.common.browser_class(args)
+    case_module = privacykpis.browsers.browser_class(args)
     if args.install:
         case_module.setup_env(args)
     else:  # uninstall path.

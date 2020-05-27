@@ -3,12 +3,13 @@ import json
 import pathlib
 import subprocess
 import time
-from typing import AnyStr, Tuple, Optional, Union, Type
+from typing import Any, AnyStr, Tuple, Optional, Union, Type
 import urllib.parse
 
 from xvfbwrapper import Xvfb  # type: ignore
 
 import privacykpis.args
+import privacykpis.browsers
 import privacykpis.common
 from privacykpis.common import err
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
@@ -16,7 +17,7 @@ from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
 
 
-SubProc = subprocess.Popen[str]
+SubProc = Any  # subprocess.Popen[AnyStr]
 
 
 class RecordingHandles:
@@ -54,11 +55,11 @@ def validate_firefox(args: argparse.Namespace) -> bool:
 
 def validate_chrome(args: argparse.Namespace) -> bool:
     if not args.profile_path:
-        privacykpis.common.err("no profile path provided")
+        err("no profile path provided")
         return False
 
     if not pathlib.Path(args.binary).is_file():
-        privacykpis.common.err(f"{args.binary} is not a file")
+        err(f"{args.binary} is not a file")
         return False
     return True
 
@@ -71,7 +72,7 @@ class Args(privacykpis.args.Args):
         url_parts = urllib.parse.urlparse(args.url)
         for index, part_name in enumerate(expected_url_parts):
             if url_parts[index] == "":
-                privacykpis.common.err(f"invalid URL, missing a {part_name}")
+                err(f"invalid URL, missing a {part_name}")
                 return
         self.url = args.url
 
@@ -93,9 +94,9 @@ class Args(privacykpis.args.Args):
             self.binary = args.binary
 
         if privacykpis.common.is_root():
-            privacykpis.common.err("please don't measure as root. "
-                                   "Use sudo with ./environment.py and run "
-                                   "this script as a less privilaged user")
+            err("please don't measure as root. "
+                "Use sudo with ./environment.py and run "
+                "this script as a less privilaged user")
             return
 
         self.case = args.case
@@ -138,7 +139,7 @@ def teardown_proxy(proxy_handle: SubProc, args: Args) -> None:
 
 
 def run(args: Args) -> None:
-    browser = privacykpis.common.browser_class(args)
+    browser = privacykpis.browsers.browser_class(args)
     proxy_handle = setup_proxy_for_url(args)
     if proxy_handle is None:
         return
