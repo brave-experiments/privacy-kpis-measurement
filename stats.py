@@ -32,4 +32,6 @@ PARSER.add_argument("--dates", "-nd", action="store_true",
 ARGS = privacykpis.stats.Args(PARSER.parse_args())
 if not ARGS.valid():
     sys.exit(-1)
+if ARGS.debug:
+    print("Debug mode on")
 privacykpis.stats.measure_samekey_difforigin(ARGS)
