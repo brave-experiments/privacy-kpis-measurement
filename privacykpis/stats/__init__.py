@@ -13,8 +13,8 @@ from privacykpis.stats.utilities import print_reidentifiying_tokens
 from privacykpis.stats.utilities import get_origins
 from privacykpis.stats.utilities import prepare_output, print_to_csv
 from privacykpis.stats.utilities import ReidentifyingPairs, ReportWriters
-from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP, VALUE, KEY
-from privacykpis.consts import TYPE, SITE
+from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP
+from privacykpis.consts import NODE_TYPE, SITE, TOKEN_VALUE, TOKEN_KEY
 from privacykpis.tokenizing import TokenLocation
 from privacykpis.types import CSVWriter, RequestRec
 
@@ -57,7 +57,7 @@ def __reidentifying_pairs(fw: ReportWriters, tp: str, tokens_kp: TokenKeypair,
     keypair_writer = cast(CSVWriter, fw["kp_csv"]) if "kp_csv" in fw else None
     for token_k in tokens_kp:
         for token_info in tokens_kp[token_k]:
-            token_v = token_info[VALUE]
+            token_v = token_info[TOKEN_VALUE]
             origin = token_info[ORIGIN]
             token_timestmp = token_info[TIMESTAMP]
             token_loc: TokenLocation = token_info[TOKEN_LOCATION]
@@ -91,7 +91,7 @@ def __get_keypairs(org: str, req: RequestRec,
         for token_k, token_v in tokens:
             if token_k not in kpairs:
                 kpairs[token_k] = []
-            kpairs[token_k].append({ORIGIN: org, VALUE: token_v,
+            kpairs[token_k].append({ORIGIN: org, TOKEN_VALUE: token_v,
                                    TOKEN_LOCATION: token_location,
                                    TIMESTAMP: req[TIMESTAMP]})
     return kpairs
@@ -105,7 +105,7 @@ def __process_graph(graph: MultiDiGraph, filters: List[FilterFunc],
     reident_all: Dict[str, ReidentifyingPairs] = {}
     for n, d in graph.nodes(data=True):
         # get 3party only
-        if n is None or d[TYPE] == SITE:
+        if n is None or d[NODE_TYPE] == SITE:
             continue
         token_kp: TokenKeypair = {}
         for origin in graph.predecessors(n):

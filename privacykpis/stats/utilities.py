@@ -9,7 +9,7 @@ import warnings
 import privacykpis.common
 from privacykpis.tokenizing import TokenLocation, TokenKey, TokenValue
 from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP
-from privacykpis.consts import KEY, VALUE, TYPE, SITE
+from privacykpis.consts import TOKEN_KEY, TOKEN_VALUE, NODE_TYPE, SITE
 from privacykpis.types import CSVWriter, RequestRec
 
 ReidentifyingPairs = Dict[str, Dict[str, Dict[str, Any]]]
@@ -20,7 +20,7 @@ ReportWriters = Dict[str, ReportOutput]
 def get_origins(input_graph: MultiDiGraph) -> List[str]:
     init_origins = []
     for n, d in input_graph.nodes(data=True):
-        if d[TYPE] == SITE:
+        if d[NODE_TYPE] == SITE:
             init_origins.append(n)
     return init_origins
 
@@ -45,12 +45,12 @@ def prepare_output(fname: str, outformat: str, debug: bool
     writers: ReportWriters = {}
     writersc: ReportWriters = {}
     if debug:
-        keypairs_headers = ["tpDomain", KEY, VALUE, ORIGIN, TOKEN_LOCATION,
-                            TIMESTAMP]
+        keypairs_headers = ["tpDomain", TOKEN_KEY, TOKEN_VALUE,
+                            ORIGIN, TOKEN_LOCATION, TIMESTAMP]
         writers["kp_csv"] = csv_writer(f"{base}_keypairs", keypairs_headers)
     if "csv" in outformat:
-        ver_csv_headers = ["tpDomain", KEY, VALUE, "sites_reidentifies",
-                           TOKEN_LOCATION]
+        ver_csv_headers = ["tpDomain", TOKEN_KEY, TOKEN_VALUE,
+                           "sites_reidentifies", TOKEN_LOCATION]
         writers["rid_ver_csv"] = csv_writer(f"{base}_reidentification_verbose",
                                             ver_csv_headers)
         rid_csv_headers = ["tpDomain", "num_of_sites_reidentifies"]
@@ -88,9 +88,10 @@ def print_reidentifiying_tokens(fw: ReportWriters, reidentify_all: Dict[str,
                 if json_ver_writer:
                     if tp not in printer_json:
                         printer_json[tp] = []
-                    printer_json[tp].append({KEY: token_k, VALUE: token_v,
-                                            TOKEN_LOCATION: tk_loc.name,
-                                            "sites_reidentifies": num_sites})
+                    entry = {TOKEN_KEY: token_k, TOKEN_VALUE: token_v,
+                             TOKEN_LOCATION: tk_loc.name,
+                             "sites_reidentifies": num_sites}
+                    printer_json[tp].append(entry)
                 # csv case
                 if csv_ver_writer:
                     row = [tp, token_k, token_v, str(num_sites), tk_loc.name]
