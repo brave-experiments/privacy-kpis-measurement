@@ -12,7 +12,7 @@ from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP
 from privacykpis.consts import TOKEN_KEY, TOKEN_VALUE, NODE_TYPE, SITE
 from privacykpis.types import CSVWriter, RequestRec
 
-ReidentifyingPairs = Dict[str, Dict[str, Dict[str, Any]]]
+ReidentifyingPairs = Dict[TokenKey, Dict[TokenValue, Dict[str, Any]]]
 ReportOutput = Union[privacykpis.types.CSVWriter, TextIO]
 ReportWriters = Dict[str, ReportOutput]
 
@@ -25,7 +25,7 @@ def get_origins(input_graph: MultiDiGraph) -> List[str]:
     return init_origins
 
 
-def get_filename(file_name: str) -> str:
+def __get_filename(file_name: str) -> str:
     if "." in file_name:
         parts = file_name.split(".")
         return parts[0]
@@ -41,7 +41,7 @@ def csv_writer(filename: str, headers: List[str]) -> CSVWriter:
 
 def prepare_output(fname: str, outformat: str, debug: bool
                    ) -> Tuple[ReportWriters, ReportWriters]:
-    base = get_filename(fname)
+    base = __get_filename(fname)
     writers: ReportWriters = {}
     writersc: ReportWriters = {}
     if debug:
@@ -74,8 +74,8 @@ def print_reidentifiying_tokens(fw: ReportWriters, reidentify_all: Dict[str,
                                                            fw) else None
     json_writer = cast(TextIO, fw["rid_json"]) if "rid_json" in fw else None
 
-    for tp in sorted(reidentify_all.keys()):
-        tp_reID = reidentify_all[tp]
+    for tparty in sorted(reidentify_all.keys()):
+        tp_reID = reidentify_all[tparty]
         total_sites = 0
         for token_k in tp_reID:
             for token_v in tp_reID[token_k]:
@@ -86,25 +86,34 @@ def print_reidentifiying_tokens(fw: ReportWriters, reidentify_all: Dict[str,
                                         TOKEN_LOCATION]
                 # json case
                 if json_ver_writer:
-                    if tp not in printer_json:
-                        printer_json[tp] = []
-                    entry = {TOKEN_KEY: token_k, TOKEN_VALUE: token_v,
-                             TOKEN_LOCATION: tk_loc.name,
-                             "sites_reidentifies": num_sites}
-                    printer_json[tp].append(entry)
+                    printer_json = __make_json_entry(tparty, printer_json,
+                                                     token_k, token_v,
+                                                     tk_loc, num_sites)
                 # csv case
                 if csv_ver_writer:
-                    row = [tp, token_k, token_v, str(num_sites), tk_loc.name]
+                    row = [tparty, token_k, token_v,
+                           str(num_sites), tk_loc.name]
                     print_to_csv(csv_ver_writer, row)
                 total_sites += num_sites
         if csv_writer:
-            print_to_csv(csv_writer, [tp, str(total_sites)])
-        rid_sum[tp] = {"num_of_sites_reidentifies": total_sites}
+            print_to_csv(csv_writer, [tparty, str(total_sites)])
+        rid_sum[tparty] = {"num_of_sites_reidentifies": total_sites}
     # json case
     if json_ver_writer:
         print_to_json(json_ver_writer, printer_json)
     if json_writer:
         print_to_json(json_writer, rid_sum)
+
+
+def __make_json_entry(tparty: str, printer_json: Dict[str, Any],
+                      token_k: TokenKey, token_v: TokenValue, tk_loc:
+                      TokenLocation, num_sites: int) -> Dict[str, Any]:
+    if tparty not in printer_json:
+        printer_json[tparty] = []
+    entry = {TOKEN_KEY: token_k, TOKEN_VALUE: token_v,
+             TOKEN_LOCATION: tk_loc.name, "sites_reidentifies": num_sites}
+    printer_json[tparty].append(entry)
+    return printer_json
 
 
 def print_to_csv(out: CSVWriter, data: List[str]) -> None:

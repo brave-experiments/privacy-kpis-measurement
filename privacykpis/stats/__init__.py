@@ -49,12 +49,13 @@ class Args(privacykpis.args.Args):
 
 
 # retrieve token keypairs that allow reidentification across origins
-def __reidentifying_pairs(fw: ReportWriters, tp: str, tokens_kp: TokenKeypair,
+def __reidentifying_pairs(fw: ReportWriters, tparty: str,
+                          tokens_kp: TokenKeypair,
                           control_kp: Optional[ReidentifyingPairs],
                           filters: List[FilterFunc]
                           ) -> ReidentifyingPairs:
     rid_pairs: ReidentifyingPairs = {}
-    keypair_writer = cast(CSVWriter, fw["kp_csv"]) if "kp_csv" in fw else None
+    kp_writer_debug = cast(CSVWriter, fw["kp_csv"]) if "kp_csv" in fw else None
     for token_k in tokens_kp:
         for token_info in tokens_kp[token_k]:
             token_v = token_info[TOKEN_VALUE]
@@ -62,11 +63,12 @@ def __reidentifying_pairs(fw: ReportWriters, tp: str, tokens_kp: TokenKeypair,
             token_timestmp = token_info[TIMESTAMP]
             token_loc: TokenLocation = token_info[TOKEN_LOCATION]
             # enabled only on debug mode
-            if keypair_writer:
-                row = [tp, token_k, token_v, origin, token_loc, token_timestmp]
-                print_to_csv(keypair_writer, row)
+            if kp_writer_debug:
+                row = [tparty, token_k, token_v, origin,
+                       token_loc, token_timestmp]
+                print_to_csv(kp_writer_debug, row)
             # filter based on control graph
-            if kp_exists_in_control(control_kp, tp, token_k, token_v,
+            if kp_exists_in_control(control_kp, tparty, token_k, token_v,
                                     origin, token_loc):
                 continue
             # filter based on additional filters requested
@@ -81,7 +83,7 @@ def __reidentifying_pairs(fw: ReportWriters, tp: str, tokens_kp: TokenKeypair,
     return rid_pairs
 
 
-# function to extract token key-pairs from edges (i.e., requests)
+# function to extract token key-pairs from edges
 def __get_keypairs(org: str, req: RequestRec,
                    kpairs: TokenKeypair) -> TokenKeypair:
     for token_location in TokenLocation:
@@ -129,6 +131,8 @@ def measure_samekey_difforigin(args: Args) -> None:
     ctrl_reidentifying_kp: Optional[Dict[str, ReidentifyingPairs]] = None
     if args.control:
         control_graph = read_gpickle(args.control.name)
+        if control_graph is None:
+            raise ValueError('None value in control graph')
         print("Processing graph from", args.control.name)
         ctrl_reidentifying_kp = __process_graph(control_graph, args.filters,
                                                 ctrl_reidentifying_kp, fc)
