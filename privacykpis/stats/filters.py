@@ -3,7 +3,7 @@ import time
 from typing import Any, Callable, Dict, List, Optional
 import dateutil.parser
 
-from privacykpis.stats.utilities import ReidentifyingOrgsAll
+from privacykpis.stats.utilities import ReidentifyingPairs
 from privacykpis.consts import TOKEN_LOCATION, ORIGIN
 from privacykpis.tokenizing import TokenKey, TokenLocation, TokenValue
 
@@ -22,12 +22,12 @@ def length(key: TokenKey, value: TokenValue,
 def dates(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
     if value.count("-") < 2 and (value.count("/") < 2 and
                                  value.count(":") < 2):
-        return False
+        return True
     try:
         dateutil.parser.parse(value)
-        return True
-    except (ValueError, OverflowError):
         return False
+    except (ValueError, OverflowError):
+        return True
 
 
 def filetypes(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
@@ -41,9 +41,10 @@ def should_include_token(key: TokenKey, value: TokenValue,
     return all([func(key, value, loc) for func in filters])
 
 
-def kp_exists_in_control(control_reid_all: Optional[ReidentifyingOrgsAll],
-                         this_tp: str,  this_k: TokenKey, this_v: TokenValue,
-                         this_org: str, this_tk_loc: TokenLocation) -> bool:
+def kp_exists_in_control(control_reid_all: Optional[Dict[str,
+                         ReidentifyingPairs]], this_tp: str,  this_k: TokenKey,
+                         this_v: TokenValue, this_org: str, this_tk_loc:
+                         TokenLocation) -> bool:
     if control_reid_all is None or this_tp not in control_reid_all:
         return False
     ctrl_kp = control_reid_all[this_tp]
