@@ -6,7 +6,7 @@ import privacykpis.browsers
 import privacykpis.common
 import privacykpis.consts
 import privacykpis.record
-from privacykpis.record import RecordingHandles
+from privacykpis.types import RecordingHandles
 
 
 class Browser(privacykpis.browsers.Interface):

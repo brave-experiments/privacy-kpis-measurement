@@ -7,7 +7,7 @@ import privacykpis.common
 import privacykpis.consts
 import privacykpis.environment
 import privacykpis.record
-from privacykpis.record import RecordingHandles
+from privacykpis.types import RecordingHandles
 
 
 USER_CERT_DB_PATH = Path.home() / Path(".pki/nssdb")

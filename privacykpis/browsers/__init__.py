@@ -1,8 +1,8 @@
 import platform
 import sys
-from typing import Type, TYPE_CHECKING, Union
+from typing import Optional, Type, TYPE_CHECKING, Union
 
-from privacykpis.record import RecordingHandles
+from privacykpis.types import RecordingHandles
 
 if TYPE_CHECKING:
     import privacykpis.environment
@@ -40,7 +40,7 @@ def browser_class(args: SubProcessArgs) -> BrowserInterface:
     is_linux = platform_name == "Linux"
     is_mac = platform_name == "Darwin"
 
-    browser_interface: BrowserInterface
+    browser_interface: Optional[BrowserInterface] = None
     if args.case == "safari":
         if is_mac:
             import privacykpis.browsers.safari as safari_module

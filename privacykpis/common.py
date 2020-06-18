@@ -2,6 +2,7 @@ import os
 import pathlib
 import platform
 import sys
+from typing import Optional, TYPE_CHECKING
 
 
 def err(msg: str) -> None:

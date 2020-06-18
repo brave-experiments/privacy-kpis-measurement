@@ -9,9 +9,8 @@ SUDO_NETWORK_STUB = ["sudo", "networksetup"]
 
 
 def stdout_of_trusted_shell_cmd(cmd: str) -> str:
-    result = subprocess.run(cmd,
-                            shell=True, check=True, capture_output=True,
-                            text=True)
+    result = subprocess.run(cmd, shell=True, check=True,
+                            capture_output=True, text=True)
     return result.stdout.strip()
 
 

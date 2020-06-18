@@ -1,8 +1,12 @@
 from abc import abstractmethod, abstractproperty
 import csv
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
-from privacykpis.tokenizing import TokenLocation
+if TYPE_CHECKING:
+    from xvfb import Xvfb  # type: ignore
+    from privacykpis.tokenizing import TokenLocation
+
+SubProc = Any  # subprocess.Popen[AnyStr]
 
 
 class CSVWriter:
@@ -19,4 +23,11 @@ class CSVWriter:
         pass
 
 
-RequestRec = Dict[Union[TokenLocation, str], Any]
+RequestRec = Dict[Union["TokenLocation", str], Any]
+
+
+class RecordingHandles:
+    def __init__(self, browser: Optional[SubProc] = None,
+                 xvfb: Optional["Xvfb"] = None) -> None:
+        self.browser = browser
+        self.xvfb = xvfb

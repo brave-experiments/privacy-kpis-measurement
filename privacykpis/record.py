@@ -3,7 +3,7 @@ import json
 import pathlib
 import subprocess
 import time
-from typing import Any, AnyStr, Tuple, Optional, Union, Type
+from typing import Any, AnyStr, Tuple, Optional, Type, TYPE_CHECKING, Union
 import urllib.parse
 
 from xvfbwrapper import Xvfb  # type: ignore
@@ -15,16 +15,7 @@ from privacykpis.common import err
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
-
-
-SubProc = Any  # subprocess.Popen[AnyStr]
-
-
-class RecordingHandles:
-    def __init__(self, browser: Optional[SubProc] = None,
-                 xvfb: Optional[Xvfb] = None) -> None:
-        self.browser = browser
-        self.xvfb = xvfb
+from privacykpis.types import SubProc
 
 
 def validate_firefox(args: argparse.Namespace) -> bool:

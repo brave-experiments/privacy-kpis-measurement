@@ -27,7 +27,7 @@ class Args(privacykpis.args.Args):
         self.case = args.case
 
         # These are only used for MacOS
-        self.proxy_port = args.proxy_port
+        self.proxy_port = str(args.proxy_port)
         self.proxy_host = args.proxy_host
 
         self.is_valid = True

@@ -2,9 +2,10 @@ import subprocess
 
 import privacykpis.common
 import privacykpis.browsers
+import privacykpis.environment
 import privacykpis.environment.macos
 import privacykpis.record
-from privacykpis.record import RecordingHandles
+from privacykpis.types import RecordingHandles
 
 
 class Browser(privacykpis.browsers.Interface):
@@ -21,3 +22,11 @@ class Browser(privacykpis.browsers.Interface):
         less_privileged_user = privacykpis.common.get_real_user()
         command = ["killall", "-u", less_privileged_user, "Safari"]
         subprocess.run(command, check=True)
+
+    @staticmethod
+    def setup_env(args: privacykpis.environment.Args) -> None:
+        privacykpis.environment.macos.setup_env(args)
+
+    @staticmethod
+    def teardown_env(args: privacykpis.environment.Args) -> None:
+        privacykpis.environment.macos.teardown_env(args)
