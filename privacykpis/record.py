@@ -59,13 +59,23 @@ class Args(privacykpis.args.Args):
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
 
-        expected_url_parts = ["scheme", "netloc"]
-        url_parts = urllib.parse.urlparse(args.url)
-        for index, part_name in enumerate(expected_url_parts):
-            if url_parts[index] == "":
-                err(f"invalid URL, missing a {part_name}")
+        if args.url:
+            expected_url_parts = ["scheme", "netloc"]
+            url_parts = urllib.parse.urlparse(args.url)
+            for index, part_name in enumerate(expected_url_parts):
+                if url_parts[index] == "":
+                    err(f"invalid URL, missing a {part_name}")
+                    return
+            self.url = args.url
+        else:
+            if not args.profile_index or not args.queue_host:
+                err("to measure urls from a queue, you must "
+                "provide a redis host and a channel offset.")
                 return
-        self.url = args.url
+            self.profile_index = args.profile_index
+            self.queue_host = args.queue_host
+            self.output_queue = args.output_queue
+            self.url = None
 
         if args.case == "safari":
             self.case = "safari"

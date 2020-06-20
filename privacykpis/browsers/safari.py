@@ -20,7 +20,8 @@ class Browser(privacykpis.browsers.Interface):
     def close(args: privacykpis.record.Args,
               browser_handle: RecordingHandles) -> None:
         less_privileged_user = privacykpis.common.get_real_user()
-        command = ["killall", "-u", less_privileged_user, "Safari"]
+        # a killed safari regenerates with previous session's tabs
+        command = ["osascript", "-e", """quit app "Safari" """]
         subprocess.run(command, check=True)
 
     @staticmethod
