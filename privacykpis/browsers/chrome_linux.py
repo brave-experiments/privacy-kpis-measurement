@@ -5,8 +5,8 @@ import subprocess
 import tarfile
 import time
 import getpass
+import os
 
-from privacykpis.args import MeasureArgs, ConfigArgs
 from privacykpis.consts import RESOURCES_PATH
 import privacykpis.common
 import privacykpis.consts
