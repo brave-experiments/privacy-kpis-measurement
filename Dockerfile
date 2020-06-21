@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -15,11 +15,13 @@ RUN curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | apt-
     && apt-get update && apt-get -y install brave-browser \
     ## py3 stuff
     && apt-get -y install python3-dev python3-pip libffi-dev libssl-dev 2>&1 \
-    && pip3 install mitmproxy xvfbwrapper \
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /tmp
+RUN pip3 install -r /tmp/requirements.txt
 
 RUN useradd -ms /bin/bash scraper && \
     echo "scraper ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/scraper && \

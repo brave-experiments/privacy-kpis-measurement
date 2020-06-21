@@ -50,7 +50,7 @@ def validate_chrome(args: argparse.Namespace) -> bool:
         err("no profile path provided")
         return False
 
-    if hasattr(args, "profile_template"):
+    if hasattr(args, "profile_template") and args.profile_template is not None:
         fullpath = RESOURCES_PATH / args.profile_template
         if not pathlib.Path(fullpath).is_file():
             err("invalid profile template path: {}".format(fullpath))

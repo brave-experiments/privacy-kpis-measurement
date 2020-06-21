@@ -2,7 +2,6 @@
 .gitignore
 LICENSE
 README.md
-requirements.txt
 Dockerfile*
 output
 profiles**

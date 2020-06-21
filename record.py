@@ -2,6 +2,7 @@
 import argparse
 import json
 import sys
+from os import unlink
 
 import redis
 
@@ -66,7 +67,6 @@ else:
             continue
         to_scrape = json.loads(packed[1].decode('utf-8'))
         ARGS.url = to_scrape['url']
-        print("scraping %s" % ARGS.url)
         privacykpis.record.run(ARGS)
         with open(ARGS.log) as f:
             content = json.loads(f.read())
@@ -75,4 +75,7 @@ else:
             content['browser'] = ARGS.case
             content['profile'] = ARGS.profile_index
             conn.rpush(ARGS.output_queue, json.dumps(content))
-        # todo: push the result onto the queue
+        try:
+            unlink(ARGS.log)
+        except FileNotFoundError:
+            pass
