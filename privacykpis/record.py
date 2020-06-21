@@ -70,7 +70,7 @@ class Args(privacykpis.args.Args):
         else:
             if not args.profile_index or not args.queue_host:
                 err("to measure urls from a queue, you must "
-                "provide a redis host and a channel offset.")
+                "provide a redis host and a profile index.")
                 return
             self.profile_index = args.profile_index
             self.queue_host = args.queue_host
