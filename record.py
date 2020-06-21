@@ -6,7 +6,7 @@ import sys
 import redis
 
 from privacykpis.consts import SUPPORTED_BROWSERS
-from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT
+from privacykpis.consts import DEFAULT_PROXY_HOST, DEFAULT_PROXY_PORT, DEFAULT_PROFILE_PATH, DEFAULT_LOG_PATH
 import privacykpis.record
 
 
@@ -33,9 +33,8 @@ PARSER.add_argument("--proxy-host", default=DEFAULT_PROXY_HOST,
 PARSER.add_argument("--proxy-port", default=DEFAULT_PROXY_PORT, type=int,
                     help="The port to use when launching mitmproxy (only "
                     "supported w/ Chrome).")
-PARSER.add_argument("--profile-path",
-                    help="Path to the browser profile to use (required except "
-                    "for Safari).")
+PARSER.add_argument("--profile-path", default=DEFAULT_PROFILE_PATH,
+    help="Path to the browser profile to use (required except for Safari).")
 PARSER.add_argument("--case", required=True, choices=SUPPORTED_BROWSERS,
                     help="Which browser condition to test.")
 PARSER.add_argument("--secs", default=30, type=int,
@@ -45,6 +44,10 @@ PARSER.add_argument("--binary",
                     "for Safari).")
 PARSER.add_argument("--debug", action="store_true",
                     help="Print debugging information.")
+PARSER.add_argument("--profile-template",
+    help="Nonstandard (i.e. including extensions) profile to use. Only works when\
+          the directory pointed to by --profile-path is empty. Should be path relative\
+          to privacykpis/resources.")
 
 ARGS = privacykpis.record.Args(PARSER.parse_args())
 if not ARGS.valid():

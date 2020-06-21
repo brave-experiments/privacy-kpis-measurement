@@ -19,8 +19,13 @@ class HeaderLogger:
             "url": self.initial_url,
             "requests": self.requests
         }
-        with open(self.log_path, "w") as h:
-            json.dump(complete_log, h)
+        if self.log_path == '-':
+            json.dump(complete_log, sys.stdout)
+            sys.stdout.write("\n")
+        else:
+            with open(self.log_path, "a") as h:
+                json.dump(complete_log, h)
+                h.write("\n")
 
     def request(self, flow):
         request_body = ""

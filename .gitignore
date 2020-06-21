@@ -2,5 +2,7 @@ __pycache__/
 .DS_Store
 .mypy_cache/
 
+output
+
 # virtualenvs
 env*
