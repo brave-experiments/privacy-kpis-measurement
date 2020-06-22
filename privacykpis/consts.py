@@ -4,6 +4,8 @@ from pathlib import Path, PurePath
 THIS_PATH = os.path.realpath(__file__)
 
 SUPPORTED_BROWSERS = ("safari", "chrome", "firefox")
+# sub-versions of chrome differentiated by profiles and/or profile extensions
+SUPPORTED_SUBCASES = ("ubo","brave")
 RESOURCES_PATH = Path(THIS_PATH, "..", "..", "resources").resolve()
 CERT_PATH = RESOURCES_PATH / Path("certs")
 LEAF_CERT = CERT_PATH / Path("mitmproxy-ca-cert.cer")

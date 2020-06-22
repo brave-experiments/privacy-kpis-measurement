@@ -38,6 +38,8 @@ PARSER.add_argument("--profile-path", default=DEFAULT_PROFILE_PATH,
     help="Path to the browser profile to use (required except for Safari).")
 PARSER.add_argument("--case", required=True, choices=SUPPORTED_BROWSERS,
                     help="Which browser condition to test.")
+PARSER.add_argument("--subcase",
+                    help="Which sub-condition (e.g. extension set) to test")
 PARSER.add_argument("--secs", default=30, type=int,
                     help="Amount of time to allow the site to load for.")
 PARSER.add_argument("--binary",
@@ -62,7 +64,11 @@ else:
     """
     while True:
         conn = redis.Redis(ARGS.queue_host)
-        packed = conn.blpop(['queue:%s:%s' % (ARGS.case, ARGS.profile_index)], 30)
+        if hasattr(ARGS, "subcase"):
+            treatment = "%s-%s" % (ARGS.case, ARGS.subcase)
+        else:
+            treatment = ARGS.case
+        packed = conn.blpop(['queue:%s:%s' % (treatment, ARGS.profile_index)], 30)
         if not packed:
             continue
         to_scrape = json.loads(packed[1].decode('utf-8'))
@@ -72,7 +78,7 @@ else:
             content = json.loads(f.read())
             content['channel'] = to_scrape['channel']
             content['date'] = to_scrape['date']
-            content['browser'] = ARGS.case
+            content['browser'] = treatment
             content['profile'] = ARGS.profile_index
             conn.rpush(ARGS.output_queue, json.dumps(content))
         try:

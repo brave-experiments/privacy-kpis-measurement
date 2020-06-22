@@ -16,6 +16,7 @@ from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
 from privacykpis.consts import RESOURCES_PATH
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
+from privacykpis.consts import SUPPORTED_SUBCASES
 from privacykpis.types import SubProc
 
 
@@ -100,7 +101,11 @@ class Args(privacykpis.args.Args):
             self.case = args.case
             self.profile_path = args.profile_path
             self.binary = args.binary
-
+        if hasattr(args, "subcase") and args.subcase:
+            if args.subcase not in SUPPORTED_SUBCASES:
+                err("the only supported subcases right now are: {}".format(", ".join(SUPPORTED_SUBCASES)))
+                return
+            self.subcase = args.subcase
         if privacykpis.common.is_root():
             err("please don't measure as root. "
                 "Use sudo with ./environment.py and run "
