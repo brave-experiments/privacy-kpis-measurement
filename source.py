@@ -44,4 +44,4 @@ def todays_alexa(browsers, treatments, num=1000):
 
 
 if __name__ == '__main__':
-    todays_alexa(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],10)
+    todays_alexa(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],1000)

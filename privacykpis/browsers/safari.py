@@ -22,7 +22,12 @@ class Browser(privacykpis.browsers.Interface):
         less_privileged_user = privacykpis.common.get_real_user()
         # a killed safari regenerates with previous session's tabs
         command = ["osascript", "-e", """quit app "Safari" """]
-        subprocess.run(command, check=True)
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError:
+            command = ["killall", "-u", less_privileged_user, "Safari"]
+            subprocess.run(command, check=True)
+
 
     @staticmethod
     def setup_env(args: privacykpis.environment.Args) -> None:

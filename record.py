@@ -74,13 +74,18 @@ else:
         to_scrape = json.loads(packed[1].decode('utf-8'))
         ARGS.url = to_scrape['url']
         privacykpis.record.run(ARGS)
-        with open(ARGS.log) as f:
-            content = json.loads(f.read())
-            content['channel'] = to_scrape['channel']
-            content['date'] = to_scrape['date']
-            content['browser'] = treatment
-            content['profile'] = ARGS.profile_index
-            conn.rpush(ARGS.output_queue, json.dumps(content))
+        try:
+            with open(ARGS.log) as f:
+                content = json.loads(f.read())
+        except FileNotFoundError:
+            content = {}
+        
+        content['channel'] = to_scrape['channel']
+        content['date'] = to_scrape['date']
+        content['browser'] = treatment
+        content['profile'] = ARGS.profile_index
+        conn.rpush(ARGS.output_queue, json.dumps(content))
+
         try:
             unlink(ARGS.log)
         except FileNotFoundError:
