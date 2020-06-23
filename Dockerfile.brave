@@ -2,4 +2,4 @@ FROM kaytwo/privacykpis:base
 
 RUN sudo /app/environment.py --install --case chrome
 
-ENTRYPOINT ["/app/record.py","--binary","/usr/bin/brave-browser","--profile-path","/tmp/profiles/brave","--case","chrome","--subcase","brave","--secs","10","--log","temp_output","--binary","/usr/bin/brave-browser","--queue-host","redis.kaytwo.org"]
+ENTRYPOINT ["/app/record.py","--binary","/usr/bin/brave-browser","--profile-path","/tmp/profiles/brave","--case","chrome","--subcase","brave","--secs","30","--log","temp_output","--binary","/usr/bin/brave-browser","--queue-host","redis.kaytwo.org"]

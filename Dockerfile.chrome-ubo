@@ -2,4 +2,4 @@ FROM kaytwo/privacykpis:base
 
 RUN sudo /app/environment.py --install --case chrome
 
-ENTRYPOINT ["/app/record.py","--binary","/usr/bin/chromium-browser","--profile-template","profiles/chrome/ubo.tgz","--profile-path","/tmp/profiles/chrome-ubo","--case","chrome","--secs","10","--log","temp_output","--queue-host","redis.kaytwo.org", "--subcase", "ubo"]
+ENTRYPOINT ["/app/record.py","--binary","/usr/bin/chromium-browser","--profile-template","profiles/chrome/ubo.tgz","--profile-path","/tmp/profiles/chrome-ubo","--case","chrome","--secs","30","--log","temp_output","--queue-host","redis.kaytwo.org", "--subcase", "ubo"]

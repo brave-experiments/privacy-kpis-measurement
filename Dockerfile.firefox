@@ -2,4 +2,4 @@ FROM kaytwo/privacykpis:base
 
 RUN sudo /app/environment.py --install --case firefox
 
-ENTRYPOINT ["/app/record.py","--binary","/usr/bin/firefox","--profile-path","/tmp/profiles/firefox","--case","firefox","--secs","10","--log","temp_output","--queue-host","redis.kaytwo.org"]
+ENTRYPOINT ["/app/record.py","--binary","/usr/bin/firefox","--profile-path","/tmp/profiles/firefox","--case","firefox","--secs","30","--log","temp_output","--queue-host","redis.kaytwo.org"]

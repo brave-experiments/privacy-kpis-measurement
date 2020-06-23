@@ -4,6 +4,7 @@ import zipfile
 from io import BytesIO, StringIO
 from urllib.request import urlopen
 from datetime import datetime
+from subprocess import check_output
 
 ALEXA_DATA_URL = 'http://s3.amazonaws.com/alexa-static/top-1m.csv.zip'
 
@@ -24,8 +25,15 @@ def alexa_etl():
             yield (int(rank), domain.strip())
 
 
+def twitter_etl():
+    """
+    Generate the output of the node based twitter article scraper.
+    """
+    urls = check_output(['node','getarticles.js'],cwd="../popular-articles-twitter/")
+    for line in urls.decode('utf-8').strip().split('\n'):
+        yield line
 
-def todays_alexa(browsers, treatments, num=1000):
+def todays_urls(browsers, treatments, num=1000):
     """
     Dump today's alexa up to num into various redis queues for consumption
     by the scrapers.
@@ -38,10 +46,14 @@ def todays_alexa(browsers, treatments, num=1000):
     for url in urls:
         for b in browsers:
             for t in treatments:
-
                 obj = {'channel':'alexa','date': today, 'url': url}
                 conn.rpush("queue:%s:%s" % (b, t),json.dumps(obj))
-
+    
+    for url in twitter_etl():
+        for b in browsers:
+            for t in treatments:
+                obj = {'channel':'twitter','date': today, 'url': url}
+                conn.rpush("queue:%s:%s" % (b, t),json.dumps(obj))
 
 if __name__ == '__main__':
-    todays_alexa(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],1000)
+    todays_urls(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],1000)
