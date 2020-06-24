@@ -5,6 +5,7 @@ from io import BytesIO, StringIO
 from urllib.request import urlopen
 from datetime import datetime
 from subprocess import check_output
+import sys
 
 ALEXA_DATA_URL = 'http://s3.amazonaws.com/alexa-static/top-1m.csv.zip'
 
@@ -40,15 +41,15 @@ def todays_urls(browsers, treatments, num=1000):
     """
     now = datetime.now() # current date and time
     today = now.strftime("%Y%m%d")
+    conn = redis.Redis("192.168.1.13")
     a = alexa_etl()
     urls = ['http://' + next(a)[1] for x in range(num)]
-    conn = redis.Redis("192.168.1.13")
     for url in urls:
         for b in browsers:
             for t in treatments:
                 obj = {'channel':'alexa','date': today, 'url': url}
                 conn.rpush("queue:%s:%s" % (b, t),json.dumps(obj))
-    
+    # FIXME: just consume all of the twitter URLs no matter what for now
     for url in twitter_etl():
         for b in browsers:
             for t in treatments:
@@ -56,4 +57,8 @@ def todays_urls(browsers, treatments, num=1000):
                 conn.rpush("queue:%s:%s" % (b, t),json.dumps(obj))
 
 if __name__ == '__main__':
-    todays_urls(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],1000)
+    if len(sys.argv) == 2:
+        length = int(sys.argv[1])
+    else:
+        length = 1000
+    todays_urls(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],length)
