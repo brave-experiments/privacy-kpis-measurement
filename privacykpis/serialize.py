@@ -32,6 +32,8 @@ def graph_from_args(args: Args) -> MultiDiGraph:
     for input_file in args.input:
         if args.multi:
             for line in input_file:
+                if line.strip() == "":
+                    continue
                 measurement = SiteMeasurement(json.loads(line))
                 measurement.add_to_graph(graph)
         else:
