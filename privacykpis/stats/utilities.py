@@ -27,7 +27,7 @@ def get_origins(input_graph: MultiDiGraph) -> List[str]:
 
 def __get_filename(file_name: str) -> str:
     if "." in file_name:
-        parts = file_name.split(".")
+        parts = file_name.rsplit('.', 1)
         return parts[0]
     return file_name
 
