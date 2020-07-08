@@ -2,6 +2,7 @@ import argparse
 from functools import partial
 import pickle
 from typing import Any, cast, Dict, List, Optional, TextIO, Tuple, Union
+from flatten_json import flatten  # type: ignore
 
 import networkx  # type: ignore
 from networkx import MultiDiGraph, read_gpickle
@@ -9,13 +10,13 @@ from networkx import MultiDiGraph, read_gpickle
 import privacykpis.args
 from privacykpis.stats.filters import FilterFunc, should_include_token
 from privacykpis.stats.filters import kp_exists_in_control
-from privacykpis.stats.utilities import print_reidentifiying_tokens
-from privacykpis.stats.utilities import get_origins
+from privacykpis.stats.utilities import print_reidentifiying_tokens, loadJSON
+from privacykpis.stats.utilities import get_origins, is_json
 from privacykpis.stats.utilities import prepare_output, print_to_csv
 from privacykpis.stats.utilities import ReidentifyingPairs, ReportWriters
 from privacykpis.consts import TOKEN_LOCATION, ORIGIN, TIMESTAMP
 from privacykpis.consts import NODE_TYPE, SITE, TOKEN_VALUE, TOKEN_KEY
-from privacykpis.tokenizing import TokenLocation
+from privacykpis.tokenizing import TokenLocation, TokenValue
 from privacykpis.types import CSVWriter, RequestRec
 
 
@@ -40,6 +41,8 @@ class Args(privacykpis.args.Args):
             filters.append(privacykpis.stats.filters.filetypes)
         if args.dates:
             filters.append(privacykpis.stats.filters.dates)
+        if args.urls:
+            filters.append(privacykpis.stats.filters.urls)
         self.input = args.input
         self.control = args.control
         self.format = args.format
@@ -67,6 +70,36 @@ def __reidentifying_pairs(fw: ReportWriters, tparty: str,
                 row = [tparty, token_k, token_v, origin,
                        token_loc, token_timestmp]
                 print_to_csv(kp_writer_debug, row)
+            # if json string replace with longest value in json string
+            if is_json(token_v):
+                longestVal = ""
+                longestVal_key = ""
+                json_elems = loadJSON(token_v)
+                for elem in json_elems:
+                    if isinstance(elem, list):
+                        continue
+                    try:
+                        flatten_elem = flatten(elem)
+                        for key, val in flatten_elem.items():
+                            if not isinstance(val, TokenValue):
+                                continue
+                            # filter based on control graph
+                            if kp_exists_in_control(control_kp, tparty,
+                                                    token_k, token_v,
+                                                    origin, token_loc):
+                                continue
+                            # filter based on additional filters requested
+                            if not should_include_token(token_k, token_v,
+                                                        token_loc, filters):
+                                continue
+                            if (len(val) > len(longestVal)):
+                                longestVal = val
+                                longestVal_key = key
+                    except AssertionError:  # not parsable JSON string
+                        continue
+                if longestVal != "":
+                    token_k = longestVal_key
+                    token_v = longestVal
             # filter based on control graph
             if kp_exists_in_control(control_kp, tparty, token_k, token_v,
                                     origin, token_loc):

@@ -25,6 +25,32 @@ def get_origins(input_graph: MultiDiGraph) -> List[str]:
     return init_origins
 
 
+# check string if json format
+def is_json(myjson: str) -> bool:
+    if not("{" in str(myjson) and "}" in str(myjson)):
+        return False
+    try:
+        json.loads(str(myjson).replace("'", '"'))
+    except ValueError:
+        return False
+    return True
+
+
+def loadJSON(token_v: TokenValue) -> List[TokenValue]:
+    elems = json.loads(token_v.replace("'", "\""))
+    if isinstance(elems, list):
+        return elems
+    else:
+        return [elems]
+
+
+def to_json_format(s: Any) -> Any:
+    if isinstance(s, str):
+        json_acceptable_string = s.replace("'", "\"")
+        return json.dumps(json.loads(json_acceptable_string))
+    return s
+
+
 def __get_filename(file_name: str) -> str:
     if "." in file_name:
         parts = file_name.rsplit('.', 1)

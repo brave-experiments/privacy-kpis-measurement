@@ -1,9 +1,11 @@
 import mimetypes
 import time
+import json
 from typing import Any, Callable, Dict, List, Optional
 import dateutil.parser
 
 from privacykpis.stats.utilities import ReidentifyingPairs
+from privacykpis.stats.utilities import is_json
 from privacykpis.consts import TOKEN_LOCATION, ORIGIN
 from privacykpis.tokenizing import TokenKey, TokenLocation, TokenValue
 
@@ -30,6 +32,13 @@ def dates(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
         return True
 
 
+def urls(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
+    if "http://" in value or "https://" in value:
+        return False
+    else:
+        return True
+
+
 def filetypes(key: TokenKey, value: TokenValue, loc: TokenLocation) -> bool:
     (mimetype, _) = mimetypes.guess_type(value)
     return mimetype is None
@@ -50,7 +59,8 @@ def kp_exists_in_control(control_reid_all: Optional[Dict[str,
     ctrl_kp = control_reid_all[this_tp]
     if (this_k in ctrl_kp) and (this_v in ctrl_kp[this_k] and ctrl_kp
                                 [this_k][this_v][TOKEN_LOCATION] == this_tk_loc
-                                and this_org in ctrl_kp[this_k][this_v][ORIGIN]
                                 ):
+        #                      and this_org in ctrl_kp[this_k][this_v][ORIGIN]
+        #                      ):
         return True
     return False

@@ -28,6 +28,9 @@ PARSER.add_argument("--filetypes", "-nf", action="store_true",
 PARSER.add_argument("--dates", "-nd", action="store_true",
                     help="Detect and filter out possible date strings from "
                     "param values.")
+PARSER.add_argument("--urls", "-nu", action="store_true",
+                    help="Detect and filter out possible URL strings from "
+                    "param values.")
 
 ARGS = privacykpis.stats.Args(PARSER.parse_args())
 if not ARGS.valid():
