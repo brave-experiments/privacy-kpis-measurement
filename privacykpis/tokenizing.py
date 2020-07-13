@@ -4,6 +4,10 @@ import http.cookies
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qsl, urlparse
 
+import privacykpis.filters
+from privacykpis.types import TokenKey, TokenValue, TokenLocation, KeyValueList
+from privacykpis.types import Token
+
 
 class BodyDataEncoding(Enum):
     UNKNOWN = 1
@@ -12,24 +16,31 @@ class BodyDataEncoding(Enum):
     FORM_MULTIPART = 4
 
 
-class TokenLocation(Enum):
-    COOKIE = 1
-    PATH = 2
-    QUERY_PARAM = 3
-    BODY = 4
-
-
-TokenKey = str
-TokenValue = str
-KeyValueList = List[Tuple[TokenKey, TokenValue]]
-
-
 class RecordParseResult:
     cookies: Optional[KeyValueList] = None
     path: Optional[KeyValueList] = None
     query: Optional[KeyValueList] = None
     body: Optional[KeyValueList] = None
     body_encoding: BodyDataEncoding = BodyDataEncoding.UNKNOWN
+
+    def __init__(self) -> None:
+        self.cookies = None
+        self.path = None
+        self.query = None
+        self.body = None
+        self.body_encoding = BodyDataEncoding.UNKNOWN
+
+
+def flaten_identifiers(graph_data: Dict[Any, Any]) -> List[Token]:
+    identifiers = []
+    for loc in TokenLocation:
+        if graph_data[loc.name] is None:
+            continue
+        for key, value in graph_data[loc.name]:
+            if privacykpis.filters.should_ignore_token(value):
+                continue
+            identifiers.append((loc.value, key, value))
+    return identifiers
 
 
 def guess_body_format(header_content_type: str) -> BodyDataEncoding:
@@ -114,7 +125,9 @@ def kvs_from_json_str(body: str) -> Optional[KeyValueList]:
         if isinstance(value, str):
             kvs.append((key, value))
         else:
-            kvs.append((key, json.dumps(value)))
+            longest_child = longest_value_in_json(value)
+            if longest_child is not None:
+                kvs.append((key, longest_child))
     return kvs
 
 
@@ -128,4 +141,29 @@ def kvs_from_body(body_format: BodyDataEncoding,
         return parse_qsl(body)
     if body_format == BodyDataEncoding.FORM_MULTIPART:
         return None
+    return None
+
+
+def longest_value_in_json(value: Any) -> Optional[TokenValue]:
+    if isinstance(value, str):
+        return value
+
+    if isinstance(value, int) or isinstance(value, float):
+        return str(value)
+
+    if isinstance(value, list):
+        longest_child = None
+        for entry in value:
+            longest_entry = longest_value_in_json(entry)
+            if longest_entry is None:
+                continue
+            elif longest_child is None:
+                longest_child = longest_entry
+            elif len(longest_child) > len(longest_entry):
+                longest_child = longest_entry
+        return longest_child
+
+    if isinstance(value, dict):
+        return longest_value_in_json(list(value.values()))
+
     return None

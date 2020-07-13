@@ -1,29 +1,32 @@
 from abc import abstractmethod, abstractproperty
 import csv
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from xvfb import Xvfb  # type: ignore
-    from privacykpis.tokenizing import TokenLocation
 
 SubProc = Any  # subprocess.Popen[AnyStr]
 
 
-class CSVWriter:
-    @abstractmethod
-    def writerow(self, row: List[str]) -> None:
-        pass
-
-    @abstractmethod
-    def writerows(self, rows: List[List[str]]) -> None:
-        pass
-
-    @abstractproperty
-    def dialect(self) -> csv.Dialect:
-        pass
+class TokenLocation(Enum):
+    COOKIE = 1
+    PATH = 2
+    QUERY_PARAM = 3
+    BODY = 4
 
 
 RequestRec = Dict[Union["TokenLocation", str], Any]
+Url = str
+Domain = str
+ThirdPartyDomain = Domain
+FirstPartyDomain = Domain
+ISOTimestamp = str
+RequestTimestamp = Tuple[Url, ISOTimestamp]
+TokenKey = str
+TokenValue = str
+KeyValueList = List[Tuple[TokenKey, TokenValue]]
+Token = Tuple[TokenLocation, TokenKey, TokenValue]
 
 
 class RecordingHandles:
