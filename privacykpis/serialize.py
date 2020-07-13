@@ -135,7 +135,8 @@ class TrackingInstances:
                 if three_p not in report:
                     report[three_p] = {}
                 loc, key, value = token
-                report[three_p][f"{loc.name}::{key}::{value}"] = first_ps
+                loc_name = TokenLocation.from_int(cast(int, loc)).name
+                report[three_p][f"{loc_name}::{key}::{value}"] = first_ps
         json.dump(report, handle)
 
     def to_pickle(self, handle: Any) -> None:

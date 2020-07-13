@@ -15,6 +15,18 @@ class TokenLocation(Enum):
     QUERY_PARAM = 3
     BODY = 4
 
+    @staticmethod
+    def from_int(num: int) -> "TokenLocation":
+        if num == 1:
+            return TokenLocation.COOKIE
+        if num == 2:
+            return TokenLocation.PATH
+        if num == 3:
+            return TokenLocation.QUERY_PARAM
+        if num == 4:
+            return TokenLocation.BODY
+        raise ValueError(f"Unknown enum value: {num}.")
+
 
 RequestRec = Dict[Union["TokenLocation", str], Any]
 Url = str

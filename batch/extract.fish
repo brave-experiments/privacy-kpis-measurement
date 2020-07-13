@@ -1,4 +1,4 @@
-#!/usr/local/bin/fish
+#!/usr/bin/env fish
 # Use ./extract.fish <path to extract.py> <path to graph pickles> <path to pickle to>
 
 set SCRIPT_PATH $argv[1];

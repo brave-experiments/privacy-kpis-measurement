@@ -1,4 +1,4 @@
-#!/usr/local/bin/fish
+#!/usr/bin/env fish
 # Use: ./serialize.fish <path to serialize.py> <path to json files> <path to pickle to>
 
 set SCRIPT_PATH $argv[1];
@@ -6,15 +6,18 @@ set GRAPH_DIR $argv[2];
 set OUTPUT_DIR $argv[3];
 
 if not test -f "$SCRIPT_PATH";
+  echo "First arg should be path to the ./serialize.py script."; 
+  exit 1;
+end;
 
 if not test -d "$GRAPH_DIR";
-  echo "First arg should be path of json data."; 
+  echo "Second arg should be path of json data."; 
   exit 1;
 end;
 
 if not test -d "$OUTPUT_DIR";
-  echo "Second arg should be directory to write results to."
-  exit 1
+  echo "Third arg should be directory to write results to.";
+  exit 1;
 end;
 
 for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
