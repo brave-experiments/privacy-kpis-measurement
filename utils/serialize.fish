@@ -22,15 +22,19 @@ end;
 
 for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
   for DATASET in twitter alexa;
-    for CASE in 1 2;
+    for CASE in 1 2 3 4;
       set DESC "$BROWSER-$DATASET-$CASE";
       set OUTPUT_PATH $OUTPUT_DIR/$DESC.pickle;
+      if not count $GRAPH_DIR/$DESC-* > /dev/null;
+        echo "skipping $DESC, no matches"
+        continue;
+      end;
       set INPUTS (ls $GRAPH_DIR/$DESC-*);
       echo $DESC;
       if test -f $OUTPUT_PATH;
         continue;
       end;
-      ./serialize.py --debug -r /tmp/redirects.pickle --input $INPUTS --multi --output $OUTPUT_PATH;
+      $SCRIPT_PATH --debug -r /tmp/redirects.pickle --input $INPUTS --multi --output $OUTPUT_PATH;
     end;
   end;
 end;

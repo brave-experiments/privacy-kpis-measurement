@@ -4,6 +4,8 @@
 set SCRIPT_PATH $argv[1];
 set INPUT_DIR $argv[2];
 set OUTPUT_DIR $argv[3];
+set FIRST_INDEX $argv[4];
+set SECOND_INDEX $argv[5];
 
 if not test -f "$SCRIPT_PATH";
   echo "First arg should be path to the ./extract.py script."; 
@@ -20,10 +22,18 @@ if not test -d "$OUTPUT_DIR"
   exit 1
 end;
 
+if not test -n $FIRST_INDEX;
+  set FIRST_INDEX 1;
+end;
+
+if not test -n $SECOND_INDEX;
+  set SECOND_INDEX 2;
+end;
+
 for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
   for DATASET in twitter alexa;
-    set MEASURE_GRAPH_PATH "$INPUT_DIR/$BROWSER-$DATASET-1.pickle";
-    set CONTROL_GRAPH_PATH "$INPUT_DIR/$BROWSER-$DATASET-2.pickle";
+    set MEASURE_GRAPH_PATH "$INPUT_DIR/$BROWSER-$DATASET-$FIRST_INDEX.pickle";
+    set CONTROL_GRAPH_PATH "$INPUT_DIR/$BROWSER-$DATASET-$SECOND_INDEX.pickle";
     set OUTPUT_JSON_PATH "$OUTPUT_DIR/$BROWSER-$DATASET.json";
 
     if test -f "$OUTPUT_JSON_PATH";
@@ -33,12 +43,12 @@ for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
 
     if not test -f "$MEASURE_GRAPH_PATH";
       echo "Could not find main graph for $BROWSER (expected at $MEASURE_GRAPH_PATH).";
-      exit 1;
+      continue;
     end;
 
     if not test -f "$CONTROL_GRAPH_PATH";
       echo "Could not find control graph for $BROWSER (expected at $CONTROL_GRAPH_PATH).";
-      exit 1;
+      continue;
     end;
 
     echo "Beginning $BROWSER, $DATASET";
