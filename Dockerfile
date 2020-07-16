@@ -16,7 +16,7 @@ RUN curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | apt-
     ## py3 stuff
     && apt-get -y install python3-dev python3-pip libffi-dev libssl-dev 2>&1 \
     # chrome stuff
-    && curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb && apt install -y ./chrome.deb && rm chrome.deb
+    && curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb > chrome.deb && apt install -y ./chrome.deb && rm chrome.deb \
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \

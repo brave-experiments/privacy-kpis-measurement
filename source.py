@@ -61,4 +61,4 @@ if __name__ == '__main__':
         length = int(sys.argv[1])
     else:
         length = 1000
-    todays_urls(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['1','2'],length)
+    todays_urls(['chrome','safari','chrome-ubo','chrome-brave','firefox'],['3','4'],length)
