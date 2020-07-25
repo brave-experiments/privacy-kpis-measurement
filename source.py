@@ -41,7 +41,7 @@ def todays_urls(browsers, treatments, num=1000):
     """
     now = datetime.now() # current date and time
     today = now.strftime("%Y%m%d")
-    conn = redis.Redis("192.168.1.13")
+    conn = redis.Redis("redis.kaytwo.org")
     a = alexa_etl()
     urls = ['http://' + next(a)[1] for x in range(num)]
     for url in urls:
@@ -49,6 +49,9 @@ def todays_urls(browsers, treatments, num=1000):
             for t in treatments:
                 obj = {'channel':'alexa','date': today, 'url': url}
                 conn.rpush("queue:%s:%s" % (b, t),json.dumps(obj))
+    # for testing, if num!=1000 don't do twitter stuff
+    if num!=1000:
+        return
     # FIXME: just consume all of the twitter URLs no matter what for now
     for url in twitter_etl():
         for b in browsers:
