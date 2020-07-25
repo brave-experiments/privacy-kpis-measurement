@@ -68,6 +68,7 @@ class Browser(privacykpis.browsers.Interface):
             ])
         if rec_handle.browser:
             rec_handle.browser.terminate()
+            rec_handle.browser.wait()
         if rec_handle.xvfb:
             rec_handle.xvfb.stop()
 
