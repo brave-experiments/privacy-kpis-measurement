@@ -71,6 +71,7 @@ class Browser(privacykpis.browsers.Interface):
             rec_handle.browser.wait()
         if rec_handle.xvfb:
             rec_handle.xvfb.stop()
+        Browser.sweep()
 
     @staticmethod
     def setup_env(args: privacykpis.environment.Args) -> None:

@@ -6,3 +6,6 @@ output
 
 # virtualenvs
 env*
+
+privacykpis.*.json
+todays_dockers
