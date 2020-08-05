@@ -1,0 +1,43 @@
+set terminal postscript enhanced eps color defaultplex \
+   leveldefault  blacktext \
+   dashed dashlength 2.0 linewidth 3.0 butt \
+   palfuncparam 2000,0.003 \
+   "Helvetica" 30
+
+set grid y lt 0 lw 1 lc rgb "#B8B8B8"
+set boxwidth 0.2 absolute
+set xlabel "Third party category" offset 0, 1
+set xtics rotate by -30 out left
+set nokey
+set ylabel "Number of first parties\nuser is reidentified" # (5th, 25th, 50th, 75th, 95th) 
+set xrange [0.75:7.5]
+set format y "10^{%L}"
+set style fill empty
+set log y
+set size 1.2,1.2
+set ytics offset 0.5,0
+set xtics offset 0,0.2
+
+set out "trackers-per-category_D6/all_browsers_3p_per_category.eps"
+plot 'trackers-per-category_D6/all_browsers_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle
+
+set out "trackers-per-category_D6/chrome_3p_per_category.eps"
+plot 'trackers-per-category_D6/chrome_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle
+
+set out "trackers-per-category_D6/chrome-brave_3p_per_category.eps"
+plot 'trackers-per-category_D6/chrome-brave_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle
+
+set out "trackers-per-category_D6/chrome-ubo_3p_per_category.eps"
+plot 'trackers-per-category_D6/chrome-ubo_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle
+
+set out "trackers-per-category_D6/firefox_3p_per_category.eps"
+plot 'trackers-per-category_D6/firefox_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle
+
+set out "trackers-per-category_D6/safari_3p_per_category.eps"
+plot 'trackers-per-category_D6/safari_3p_per_category.tsv' using 0:6:5:9:8:xticlabels(1) t "" lc rgb 'red' with candlesticks whiskerbars, \
+    ''  using 0:7:7:7:7 with candlesticks lt -1 notitle

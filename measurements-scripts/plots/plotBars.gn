@@ -1,0 +1,57 @@
+set terminal postscript enhanced eps color defaultplex \
+   leveldefault  blacktext \
+   solid dashlength 2.0 linewidth 3.0 butt \
+   palfuncparam 2000,0.003 \
+   "Helvetica" 28
+
+
+set grid y lt 0 lw 1 lc rgb "#B8B8B8"
+
+set key top left
+set xlabel ""
+set style data histogram
+set style histogram cluster gap 1
+set style fill solid 1.0 border -1
+set ytics offset 0.5,0
+set xtics rotate by -20 
+
+
+set xrange [0.5:5.5]
+set yrange [0:*]
+set ylabel "Average number of third parties\nper crawl" offset 0.5,0
+set output "trackers-per-browser_B1/trackers_per_browser_abs.eps" 
+plot "trackers-per-browser_B1/tpPerBrowser_absolutes.tsv" u 2:xtic(1) lc rgb 'black' t "all", \
+"" u 3:xtic(1) lc rgb 'red' t "alexa", \
+"" u 4:xtic(1) lc rgb 'blue' t "twitter"
+
+set yrange [0:100]
+set format y "%g%%"
+set ylabel "Portion of all third parties\nin the dataset" offset -0.2,0
+set output "trackers-per-browser_B1/trackers_per_browser_perc.eps" 
+plot "trackers-per-browser_B1/tpPerBrowser_percentages.tsv" u 2:xtic(1) lc rgb 'black' t "all", \
+"" u 3:xtic(1) lc rgb 'red' t "alexa", \
+"" u 4:xtic(1) lc rgb 'blue' t "twitter"
+
+set yrange [0:*]
+set ylabel "Percentage of all tokens" offset 0.5,0
+set xrange [-0.5:4.5]
+set key below
+set key autotitle columnheader
+
+set output "token-locations_G10/token_locations.eps"
+plot "token-locations_G10/all_token_locations.tsv" u 3:xtic(1) lc rgb 'grey', \
+"" u 5:xtic(1) lc rgb 'blue20', \
+"" u 7:xtic(1) lc rgb 'green30', \
+"" u 9:xtic(1) lc rgb 'brown40'
+
+set output "token-locations_G10/alexa_token_locations.eps"
+plot "token-locations_G10/alexa_token_locations.tsv" u 3:xtic(1) lc rgb 'grey', \
+"" u 5:xtic(1) lc rgb 'blue20', \
+"" u 7:xtic(1) lc rgb 'green30', \
+"" u 9:xtic(1) lc rgb 'brown40'
+
+set output "token-locations_G10/twitter_token_locations.eps"
+plot "token-locations_G10/twitter_token_locations.tsv" u 3:xtic(1) lc rgb 'grey', \
+"" u 5:xtic(1) lc rgb 'blue20', \
+"" u 7:xtic(1) lc rgb 'green30', \
+"" u 9:xtic(1) lc rgb 'brown40'

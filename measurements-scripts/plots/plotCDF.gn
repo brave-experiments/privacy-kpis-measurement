@@ -1,0 +1,52 @@
+set terminal postscript enhanced eps color defaultplex \
+   leveldefault  blacktext \
+   solid dashlength 2.0 linewidth 3.0 butt \
+   palfuncparam 2000,0.003 \
+   "Helvetica" 26
+
+set xlabel "Number of first parties each third party\ncan reidentify user across" 
+set grid y lt 0 lw 1 lc rgb "#B8B8B8"
+set yrange [0:100]
+set ytics offset 0.7,0
+set format y "%.0f%%"
+set key top Left left samplen 1 reverse
+set key bottom right
+set log x
+set ylabel "CDF of third parties" offset 0.8,0
+set output 'sites-per-tracker_B2/both_fp_per_tp_cdf.eps'
+set style data lines
+set boxwidth 0.9
+set pointintervalbox 3
+plot 'sites-per-tracker_B2/chrome-all-fp_per_tp_cdf.tsv' using 1:4 t "Chrome" lt 1 lc rgb "blue60" lw 2, \
+  'sites-per-tracker_B2/firefox-all-fp_per_tp_cdf.tsv' using 1:4 t "Firefox" lt 1 lc rgb "orange60" lw 2, \
+'sites-per-tracker_B2/chrome-ubo-all-fp_per_tp_cdf.tsv' using 1:4 t "Chrome-ubo" lt 1 lc rgb "green60" lw 2, \
+'sites-per-tracker_B2/chrome-brave-all-fp_per_tp_cdf.tsv' using 1:4 t "Brave" lt 1 lc rgb "red60" lw 2, \
+'sites-per-tracker_B2/safari-all-fp_per_tp_cdf.tsv' using 1:4 t "Safari" lt 1 lc rgb "cyan60" lw 2
+
+set output 'sites-per-tracker_B2/alexa_fp_per_tp_cdf.eps'
+plot 'sites-per-tracker_B2/chrome-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Chrome" lt 1 lc rgb "blue60" lw 2, \
+  'sites-per-tracker_B2/firefox-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Firefox" lt 1 lc rgb "orange60" lw 2, \
+'sites-per-tracker_B2/chrome-ubo-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Chrome-ubo" lt 1 lc rgb "green60" lw 2, \
+'sites-per-tracker_B2/chrome-brave-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Brave" lt 1 lc rgb "red60" lw 2, \
+'sites-per-tracker_B2/safari-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Safari" lt 1 lc rgb "cyan60" lw 2
+
+set output 'sites-per-tracker_B2/twitter_fp_per_tp_cdf.eps'
+plot 'sites-per-tracker_B2/chrome-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Chrome" lt 1 lc rgb "blue60" lw 2, \
+  'sites-per-tracker_B2/firefox-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Firefox" lt 1 lc rgb "orange60" lw 2, \
+'sites-per-tracker_B2/chrome-ubo-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Chrome-ubo" lt 1 lc rgb "green60" lw 2, \
+'sites-per-tracker_B2/chrome-brave-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Brave" lt 1 lc rgb "red60" lw 2, \
+'sites-per-tracker_B2/safari-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Safari" lt 1 lc rgb "cyan60" lw 2
+
+set xrange [*:200]
+set key font ",23" bottom right samplen 2
+set output 'trackers-per-browser_per_dataset_F8/twitter_fp_per_tp_cdf.eps'
+plot 'sites-per-tracker_B2/chrome-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Alexa: Chrome" lt 1 lc rgb "blue60" lw 2, \
+  'sites-per-tracker_B2/firefox-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Alexa: Firefox" lt 1 lc rgb "orange60" lw 2, \
+'sites-per-tracker_B2/chrome-ubo-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Alexa: Chrome-ubo" lt 1 lc rgb "green60" lw 2, \
+'sites-per-tracker_B2/chrome-brave-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Alexa: Brave" lt 1 lc rgb "red60" lw 2, \
+'sites-per-tracker_B2/safari-alexa-fp_per_tp_cdf.tsv' using 1:4 t "Alexa: Safari" lt 1 lc rgb "cyan60" lw 2, \
+ 'sites-per-tracker_B2/chrome-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Twitter: Chrome" lt 3 dt 2 lc rgb "blue60" lw 2, \
+  'sites-per-tracker_B2/firefox-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Twitter: Firefox" lt 3 dt 2 lc rgb "orange60" lw 2, \
+'sites-per-tracker_B2/chrome-ubo-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Twitter: Chrome-ubo" lt 3 dt 2 lc rgb "green60" lw 2, \
+'sites-per-tracker_B2/chrome-brave-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Twitter: Brave" lt 3 dt 2 lc rgb "red60" lw 2, \
+'sites-per-tracker_B2/safari-twitter-fp_per_tp_cdf.tsv' using 1:4 t "Twitter: Safari" lt 3 dt 2 lc rgb "cyan60" lw 2, \
