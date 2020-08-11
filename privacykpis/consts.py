@@ -11,6 +11,8 @@ LOG_HEADERS_SCRIPT_PATH = RESOURCES_PATH / Path("scripts", "log_headers.py")
 
 DEFAULT_FIREFOX_PROFILE = RESOURCES_PATH / Path("profiles/firefox")
 
+CHROME_POLICY_PATH = RESOURCES_PATH / Path("misc", "chrome_policy.json")
+
 DEFAULT_PROXY_HOST = "127.0.0.1"
 DEFAULT_PROXY_PORT = 8888
 
