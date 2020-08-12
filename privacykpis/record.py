@@ -20,6 +20,13 @@ from privacykpis.consts import DEFAULT_PROXY_PORT
 from privacykpis.types import SubProc
 
 
+HEADERS = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/84.0.4147.111 Safari/537.36"
+}
+
+
 def _validate_firefox(args: argparse.Namespace) -> bool:
     if not args.profile_path:
         err("no profile path provided")
@@ -144,7 +151,7 @@ def _request_chain_for_url(url: str, debug: bool) -> Optional[List[str]]:
     try:
         if debug:
             print(f"Resolving URL chain for {url}.")
-        result = requests.get(url, timeout=5)
+        result = requests.get(url, timeout=5, headers=HEADERS)
         urls = [r.url for r in result.history]
         urls.append(result.url)
         return urls
