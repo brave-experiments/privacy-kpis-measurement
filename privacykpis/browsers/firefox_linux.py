@@ -11,7 +11,7 @@ from privacykpis.types import RecordingHandles
 
 class Browser(privacykpis.browsers.Interface):
     @staticmethod
-    def launch(args: privacykpis.record.Args) -> RecordingHandles:
+    def launch(args: privacykpis.record.Args, url: str) -> RecordingHandles:
         # Sneak this in here because there are problems running Xvfb
         # as sudo, and sudo is needed for the *_env functions.
         from xvfbwrapper import Xvfb  # type: ignore
@@ -25,7 +25,7 @@ class Browser(privacykpis.browsers.Interface):
         ff_args = [
             args.binary,
             "--profile", args.profile_path,
-            args.url
+            url
         ]
         xvfb_handle = Xvfb()
         xvfb_handle.start()

@@ -33,7 +33,7 @@ def _remove_managed_policies() -> None:
         managed_policy_file = managed_policy_dir / POLICY_FILE_NAME
         if managed_policy_dir.is_dir():
             if managed_policy_file.is_file():
-                managed_policy_file.unlink(missing_ok=False)
+                managed_policy_file.unlink()
             managed_policy_dir.rmdir()
 
 
@@ -85,7 +85,7 @@ def _edit_profile_to_prevent_session_restore(profile_path: str) -> None:
 
 class Browser(privacykpis.browsers.Interface):
     @staticmethod
-    def launch(args: privacykpis.record.Args) -> RecordingHandles:
+    def launch(args: privacykpis.record.Args, url: str) -> RecordingHandles:
         # Sneak this in here because there are problems running Xvfb
         # as sudo, and sudo is needed for the *_env functions.
         from xvfbwrapper import Xvfb  # type: ignore
@@ -96,7 +96,7 @@ class Browser(privacykpis.browsers.Interface):
             args.binary,
             "--user-data-dir=" + args.profile_path,
             "--proxy-server={}:{}".format(args.proxy_host, args.proxy_port),
-            args.url
+            url
         ]
         xvfb_handle = Xvfb()
         xvfb_handle.start()

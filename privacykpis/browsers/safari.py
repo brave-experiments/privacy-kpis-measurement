@@ -10,9 +10,9 @@ from privacykpis.types import RecordingHandles
 
 class Browser(privacykpis.browsers.Interface):
     @staticmethod
-    def launch(args: privacykpis.record.Args) -> RecordingHandles:
+    def launch(args: privacykpis.record.Args, url: str) -> RecordingHandles:
         less_privileged_user = privacykpis.common.get_real_user()
-        command = ["open", args.url, "-g", "-a", args.binary]
+        command = ["open", url, "-g", "-a", args.binary]
         subprocess.run(command, check=True)
         return RecordingHandles()
 

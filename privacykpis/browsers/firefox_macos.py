@@ -11,7 +11,7 @@ from privacykpis.types import RecordingHandles
 
 class Browser(privacykpis.browsers.Interface):
     @staticmethod
-    def launch(args: privacykpis.record.Args) -> RecordingHandles:
+    def launch(args: privacykpis.record.Args, url: str) -> RecordingHandles:
         # Check to see if we need to copy the default firefox profile over to
         # wherever we're running from.
         if not pathlib.Path(args.profile_path).is_dir():
@@ -21,7 +21,7 @@ class Browser(privacykpis.browsers.Interface):
         ff_args = [
             args.binary,
             "--profile", args.profile_path,
-            args.url
+            url
         ]
 
         if args.debug:

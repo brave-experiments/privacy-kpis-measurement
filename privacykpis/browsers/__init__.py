@@ -18,7 +18,7 @@ BrowserInterface = Type["Interface"]
 
 class Interface:
     @staticmethod
-    def launch(args: "privacykpis.record.Args") -> RecordingHandles:
+    def launch(args: "privacykpis.record.Args", url: str) -> RecordingHandles:
         return RecordingHandles()
 
     @staticmethod

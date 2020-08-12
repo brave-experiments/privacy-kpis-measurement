@@ -1,11 +1,13 @@
 import argparse
+import base64
 import json
 import pathlib
 import subprocess
 import time
-from typing import Any, AnyStr, Tuple, Optional, Type, TYPE_CHECKING, Union
+from typing import Any, AnyStr, List, Tuple, Optional, Type, Union
 import urllib.parse
 
+import requests
 from xvfbwrapper import Xvfb  # type: ignore
 
 import privacykpis.args
@@ -18,7 +20,7 @@ from privacykpis.consts import DEFAULT_PROXY_PORT
 from privacykpis.types import SubProc
 
 
-def validate_firefox(args: argparse.Namespace) -> bool:
+def _validate_firefox(args: argparse.Namespace) -> bool:
     if not args.profile_path:
         err("no profile path provided")
         return False
@@ -44,7 +46,7 @@ def validate_firefox(args: argparse.Namespace) -> bool:
     return True
 
 
-def validate_chrome(args: argparse.Namespace) -> bool:
+def _validate_chrome(args: argparse.Namespace) -> bool:
     if not args.profile_path:
         err("no profile path provided")
         return False
@@ -72,13 +74,13 @@ class Args(privacykpis.args.Args):
             self.profile_path = ""
             self.binary = "/Applications/Safari.app"
         elif args.case == "firefox":
-            if not validate_firefox(args):
+            if not _validate_firefox(args):
                 return
             self.case = "firefox"
             self.binary = args.binary
             self.profile_path = args.profile_path
         else:  # chrome case
-            if not validate_chrome(args):
+            if not _validate_chrome(args):
                 return
             self.case = args.case
             self.profile_path = args.profile_path
@@ -98,7 +100,16 @@ class Args(privacykpis.args.Args):
         self.is_valid = True
 
 
-def setup_proxy_for_url(args: Args) -> Optional[SubProc]:
+def _setup_proxy_for_url(args: Args,
+                         request_chain: List[str]) -> Optional[SubProc]:
+    proxy_args = {
+        "url": request_chain[-1],
+        "log_path": args.log,
+        "request_chain": request_chain,
+    }
+    proxy_args_bytes = json.dumps(proxy_args).encode("utf-8")
+    encoded_args = base64.b64encode(proxy_args_bytes)
+
     mitmdump_args = [
         "mitmdump",
         "--listen-host", args.proxy_host,
@@ -106,7 +117,7 @@ def setup_proxy_for_url(args: Args) -> Optional[SubProc]:
         "-s", str(LOG_HEADERS_SCRIPT_PATH),
         "--set", f"confdir={CERT_PATH}",
         "-q",
-        json.dumps(dict(privacy_kpis_url=args.url, privacy_kpis_log=args.log))
+        encoded_args
     ]
 
     proxy_handle = subprocess.Popen(mitmdump_args, stderr=None,
@@ -129,13 +140,34 @@ def teardown_proxy(proxy_handle: SubProc, args: Args) -> None:
     proxy_handle.wait()
 
 
+def _request_chain_for_url(url: str, debug: bool) -> Optional[List[str]]:
+    try:
+        if debug:
+            print(f"Resolving URL chain for {url}.")
+        result = requests.get(url, timeout=5)
+        urls = [r.url for r in result.history]
+        urls.append(result.url)
+        return urls
+    except requests.exceptions.Timeout:
+        if debug:
+            print(f"Determining the redirection chain for {url} timed out.")
+        return None
+
+
 def run(args: Args) -> None:
+    request_chain = _request_chain_for_url(args.url, args.debug)
+    if request_chain is None:
+        if args.debug:
+            print("Couldn't determine what URL to request; stopping.")
+        return None
+    final_url = request_chain[-1]
+
     browser = privacykpis.browsers.browser_class(args)
-    proxy_handle = setup_proxy_for_url(args)
+    proxy_handle = _setup_proxy_for_url(args, request_chain)
     if proxy_handle is None:
         return
 
-    browser_info = browser.launch(args)
+    browser_info = browser.launch(args, final_url)
     if args.debug:
         print("browser loaded, waiting {} secs".format(args.secs))
     time.sleep(args.secs)
