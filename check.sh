@@ -2,5 +2,5 @@
 
 # Simple helper script to do some static checking of the code.
 
-mypy --strict *.py
-pycodestyle --exclude measurements-scripts/ .
+mypy --strict extract.py environment.py record.py serialize.py
+pycodestyle --exclude measurements-scripts/,source.py,sink.py .

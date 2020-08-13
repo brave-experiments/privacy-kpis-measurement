@@ -1,9 +1,15 @@
+import getpass
 import json
+import os
 from pathlib import Path
+import pathlib
+import shutil
 import subprocess
+import tarfile
+import time
 from typing import Any, Dict, List, Union
 
-import privacykpis.browsers
+from privacykpis.consts import RESOURCES_PATH
 import privacykpis.common
 import privacykpis.consts
 import privacykpis.environment
@@ -82,6 +88,10 @@ def _edit_profile_to_prevent_session_restore(profile_path: str) -> None:
         json.dump(data, write_handle)
         write_handle.close()
 
+    singleton_path = profile_dir / Path("SingletonLock")
+    if singleton_path.is_symlink():
+        singleton_path.unlink()
+
 
 class Browser(privacykpis.browsers.Interface):
     @staticmethod
@@ -89,6 +99,16 @@ class Browser(privacykpis.browsers.Interface):
         # Sneak this in here because there are problems running Xvfb
         # as sudo, and sudo is needed for the *_env functions.
         from xvfbwrapper import Xvfb  # type: ignore
+
+        # Check to see if we need to copy the specialized profile over to
+        # wherever we're storing the actively used profile.
+        if args.profile_template is not None:
+            possible_profile_path = Path(args.profile_path)
+            if not possible_profile_path.is_dir():
+                profile_template = RESOURCES_PATH / args.profile_template
+                possible_profile_path.mkdir(parents=True)
+                with tarfile.open(profile_template) as tf:
+                    tf.extractall(args.profile_path)
 
         _edit_profile_to_prevent_session_restore(args.profile_path)
 
@@ -123,8 +143,10 @@ class Browser(privacykpis.browsers.Interface):
             ])
         if rec_handle.browser:
             rec_handle.browser.terminate()
+            rec_handle.browser.wait()
         if rec_handle.xvfb:
             rec_handle.xvfb.stop()
+        Browser.sweep()
 
     @staticmethod
     def setup_env(args: privacykpis.environment.Args) -> None:

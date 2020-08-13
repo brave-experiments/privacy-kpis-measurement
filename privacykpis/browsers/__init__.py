@@ -1,4 +1,6 @@
 import platform
+import os
+import errno
 import sys
 from typing import Optional, Type, TYPE_CHECKING, Union
 
@@ -33,6 +35,17 @@ class Interface:
     @staticmethod
     def teardown_env(args: "privacykpis.environment.Args") -> None:
         pass
+
+    @staticmethod
+    def sweep() -> None:
+        try:
+            while os.waitpid(-1, os.WNOHANG) != (0, 0):
+                pass
+        except OSError as e:
+            if e.errno != errno.ECHILD:
+                print(f"unexpected error: {e}")
+            else:
+                print(f"waited a zombie: {e}")
 
 
 def browser_class(args: SubProcessArgs) -> BrowserInterface:

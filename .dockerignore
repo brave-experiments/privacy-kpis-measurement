@@ -1,0 +1,10 @@
+**/__pycache__
+.gitignore
+LICENSE
+README.md
+Dockerfile*
+output
+profiles**
+.vscode
+.git**
+privacykpis.*.json

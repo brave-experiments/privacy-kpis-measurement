@@ -1,0 +1,5 @@
+FROM kaytwo/privacykpis:base
+
+RUN sudo /app/environment.py --install --case chrome
+
+ENTRYPOINT ["/app/record.py","--binary","/usr/bin/google-chrome","--profile-path","/tmp/profiles/chrome","--case","chrome","--secs","30","--log","temp_output","--queue-host","redis.kaytwo.org"]

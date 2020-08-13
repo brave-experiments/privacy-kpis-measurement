@@ -15,8 +15,10 @@ import privacykpis.browsers
 import privacykpis.common
 from privacykpis.common import err
 from privacykpis.consts import CERT_PATH, LOG_HEADERS_SCRIPT_PATH
+from privacykpis.consts import RESOURCES_PATH
 from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
+from privacykpis.consts import SUPPORTED_SUBCASES
 from privacykpis.types import SubProc
 
 
@@ -58,6 +60,12 @@ def _validate_chrome(args: argparse.Namespace) -> bool:
         err("no profile path provided")
         return False
 
+    if hasattr(args, "profile_template") and args.profile_template is not None:
+        fullpath = RESOURCES_PATH / args.profile_template
+        if not pathlib.Path(fullpath).is_file():
+            err("invalid profile template path: {}".format(fullpath))
+            return False
+
     if not pathlib.Path(args.binary).is_file():
         err(f"{args.binary} is not a file")
         return False
@@ -68,13 +76,23 @@ class Args(privacykpis.args.Args):
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
 
-        expected_url_parts = ["scheme", "netloc"]
-        url_parts = urllib.parse.urlparse(args.url)
-        for index, part_name in enumerate(expected_url_parts):
-            if url_parts[index] == "":
-                err(f"invalid URL, missing a {part_name}")
+        if args.url:
+            expected_url_parts = ["scheme", "netloc"]
+            url_parts = urllib.parse.urlparse(args.url)
+            for index, part_name in enumerate(expected_url_parts):
+                if url_parts[index] == "":
+                    err(f"invalid URL, missing a {part_name}")
+                    return
+            self.url = args.url
+        else:
+            if not args.profile_index or not args.queue_host:
+                err("to measure urls from a queue, you must "
+                    "provide a redis host and a profile index.")
                 return
-        self.url = args.url
+            self.profile_index = args.profile_index
+            self.queue_host = args.queue_host
+            self.output_queue = args.output_queue
+            self.url = None
 
         if args.case == "safari":
             self.case = "safari"
@@ -93,11 +111,22 @@ class Args(privacykpis.args.Args):
             self.profile_path = args.profile_path
             self.binary = args.binary
 
+        if hasattr(args, "subcase") and args.subcase:
+            if args.subcase not in SUPPORTED_SUBCASES:
+                err("the only supported subcases right now are: "
+                    "{}".format(", ".join(SUPPORTED_SUBCASES)))
+                return
+            self.subcase = args.subcase
+
         if privacykpis.common.is_root():
             err("please don't measure as root. "
                 "Use sudo with ./environment.py and run "
                 "this script as a less privilaged user")
             return
+
+        self.profile_template = None
+        if args.profile_template is not None:
+            self.profile_template = args.profile_template
 
         self.case = args.case
         self.secs = args.secs
