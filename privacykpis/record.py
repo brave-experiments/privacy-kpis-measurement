@@ -188,6 +188,11 @@ def _request_chain_for_url(url: str, debug: bool) -> Optional[List[str]]:
         if debug:
             print(f"Determining the redirection chain for {url} timed out.")
         return None
+    except requests.exceptions.RequestException as e:
+        if debug:
+            print(f"Non timeout error when requesting {url}.")
+            print(str(e))
+        return None
 
 
 def run(args: Args) -> None:
