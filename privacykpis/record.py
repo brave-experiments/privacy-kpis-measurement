@@ -7,7 +7,6 @@ import time
 from typing import Any, AnyStr, List, Tuple, Optional, Type, Union
 import urllib.parse
 
-import requests
 from xvfbwrapper import Xvfb  # type: ignore
 
 import privacykpis.args
@@ -20,13 +19,6 @@ from privacykpis.consts import DEFAULT_FIREFOX_PROFILE, DEFAULT_PROXY_HOST
 from privacykpis.consts import DEFAULT_PROXY_PORT
 from privacykpis.consts import SUPPORTED_SUBCASES
 from privacykpis.types import SubProc
-
-
-HEADERS = {
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/84.0.4147.111 Safari/537.36"
-}
 
 
 def _validate_firefox(args: argparse.Namespace) -> bool:
@@ -136,12 +128,10 @@ class Args(privacykpis.args.Args):
         self.is_valid = True
 
 
-def _setup_proxy_for_url(args: Args,
-                         request_chain: List[str]) -> Optional[SubProc]:
+def _setup_proxy_for_url(args: Args) -> Optional[SubProc]:
     proxy_args = {
-        "url": request_chain[-1],
+        "url": args.url,
         "log_path": args.log,
-        "request_chain": request_chain,
     }
     proxy_args_bytes = json.dumps(proxy_args).encode("utf-8")
     encoded_args = base64.b64encode(proxy_args_bytes)
@@ -176,39 +166,13 @@ def teardown_proxy(proxy_handle: SubProc, args: Args) -> None:
     proxy_handle.wait()
 
 
-def _request_chain_for_url(url: str, debug: bool) -> Optional[List[str]]:
-    try:
-        if debug:
-            print(f"Resolving URL chain for {url}.")
-        result = requests.get(url, timeout=5, headers=HEADERS)
-        urls = [r.url for r in result.history]
-        urls.append(result.url)
-        return urls
-    except requests.exceptions.Timeout:
-        if debug:
-            print(f"Determining the redirection chain for {url} timed out.")
-        return None
-    except requests.exceptions.RequestException as e:
-        if debug:
-            print(f"Non timeout error when requesting {url}.")
-            print(str(e))
-        return None
-
-
 def run(args: Args) -> None:
-    request_chain = _request_chain_for_url(args.url, args.debug)
-    if request_chain is None:
-        if args.debug:
-            print("Couldn't determine what URL to request; stopping.")
-        return None
-    final_url = request_chain[-1]
-
     browser = privacykpis.browsers.browser_class(args)
-    proxy_handle = _setup_proxy_for_url(args, request_chain)
+    proxy_handle = _setup_proxy_for_url(args)
     if proxy_handle is None:
         return
 
-    browser_info = browser.launch(args, final_url)
+    browser_info = browser.launch(args, args.url)
     if args.debug:
         print("browser loaded, waiting {} secs".format(args.secs))
     time.sleep(args.secs)

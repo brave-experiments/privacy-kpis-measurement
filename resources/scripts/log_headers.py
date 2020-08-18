@@ -2,6 +2,9 @@ import base64
 import datetime
 import json
 import sys
+from typing import List
+
+import requests
 
 
 class HeaderLogger:
@@ -11,17 +14,15 @@ class HeaderLogger:
 
         self.requests = []
         self.start_time = datetime.datetime.now()
-        self.initial_url = parent_args['url']
+        self.url = parent_args['url']
         self.log_path = parent_args['log_path']
-        self.request_chain = parent_args['request_chain']
 
     def done(self):
         end_time = datetime.datetime.now()
         complete_log = {
             "start": str(self.start_time),
             "end": str(end_time),
-            "url": self.initial_url,
-            "request_chain": self.request_chain,
+            "url": self.url,
             "requests": self.requests
         }
         if self.log_path == '-':
