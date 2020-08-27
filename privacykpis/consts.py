@@ -8,7 +8,7 @@ SUPPORTED_BROWSERS = ("safari", "chrome", "firefox")
 SUPPORTED_SUBCASES = ("ubo", "brave")
 RESOURCES_PATH = Path(THIS_PATH, "..", "..", "resources").resolve()
 CERT_PATH = RESOURCES_PATH / Path("certs")
-LEAF_CERT = CERT_PATH / Path("mitmproxy-ca-cert.cer")
+LEAF_CERT = CERT_PATH / Path("mitmproxy-ca.pem")
 LOG_HEADERS_SCRIPT_PATH = RESOURCES_PATH / Path("scripts", "log_headers.py")
 
 DEFAULT_FIREFOX_PROFILE = RESOURCES_PATH / Path("profiles/firefox")

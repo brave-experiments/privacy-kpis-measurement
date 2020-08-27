@@ -1,3 +1,4 @@
 {
+  "EnableCommonNameFallbackForLocalAnchors": true,
   "RestoreOnStartup": 5
 }

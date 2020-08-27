@@ -1,6 +1,7 @@
 import argparse
 import platform
-from typing import Literal, Optional
+import pwd
+from typing import Literal
 
 import privacykpis.args
 import privacykpis.browsers
@@ -14,6 +15,7 @@ class Args(privacykpis.args.Args):
     uninstall: bool
     case: Literal["chrome", "firefox", "safari"]
     is_valid: bool
+    crawl_user: str
 
     def __init__(self, args: argparse.Namespace):
         super().__init__(args)
@@ -36,6 +38,14 @@ class Args(privacykpis.args.Args):
 
         self.proxy_port = str(args.proxy_port)
         self.proxy_host = args.proxy_host
+
+        if args.case == "chrome":
+            try:
+                pwd.getpwnam(args.user)
+                self.crawl_user = args.user
+            except KeyError:
+                privacykpis.common.err(f"{args.user} isn't a recognized user.")
+                return
 
         self.case = args.case
         self.is_valid = True

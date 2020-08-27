@@ -17,11 +17,17 @@ import privacykpis.record
 from privacykpis.types import RecordingHandles
 
 
-USER_CERT_DB_PATH = Path.home() / Path(".pki/nssdb")
-USER_CERT_DB = "sql:{}".format(str(USER_CERT_DB_PATH))
 CHROMIUM_POLICIES_DIR = Path("/etc/chromium/policies")
 CHROME_POLICIES_DIR = Path("/etc/opt/chrome/policies")
 POLICY_FILE_NAME = Path("chrome_policy.json")
+
+
+def _user_cert_db_path(args: privacykpis.environment.Args) -> Path:
+    return Path(f"/home/{args.crawl_user}/.pki/nssdb")
+
+
+def _user_cert_db(args: privacykpis.environment.Args) -> str:
+    return f"sql:{_user_cert_db_path(args)}"
 
 
 def _setup_managed_policies() -> None:
@@ -150,26 +156,31 @@ class Browser(privacykpis.browsers.Interface):
 
     @staticmethod
     def setup_env(args: privacykpis.environment.Args) -> None:
-        target_user = privacykpis.common.get_real_user()
+        target_user = args.crawl_user
+        user_cert_db_path = _user_cert_db_path(args)
+        user_cert_db = _user_cert_db(args)
+
         setup_args = [
             # Create the nssdb directory for this user.
-            ["mkdir", "-p", str(USER_CERT_DB_PATH)],
+            ["mkdir", "-p", str(user_cert_db_path)],
             # Create an empty CA container / database.
-            ["certutil", "-N", "-d", USER_CERT_DB, "--empty-password"],
+            ["certutil", "-N", "-d", user_cert_db, "--empty-password"],
             # Add the mitmproxy cert to the newly created database.
-            ["certutil", "-A", "-d", USER_CERT_DB, "-i",
+            ["certutil", "-A", "-d", user_cert_db, "-i",
                 str(privacykpis.consts.LEAF_CERT), "-n", "mitmproxy", "-t",
-                "TC,TC,TC"]
+                "C,,"]
         ]
         sudo_prefix = ["sudo", "-u", target_user]
         for command in setup_args:
-            subprocess.run(sudo_prefix + command)
+            cmd = sudo_prefix + command
+            if args.debug:
+                print("setup_env: " + " ".join(cmd))
+            subprocess.run(cmd)
         _setup_managed_policies()
 
     @staticmethod
     def teardown_env(args: privacykpis.environment.Args) -> None:
-        target_user = privacykpis.common.get_real_user()
-        subprocess.run([
-            "sudo", "-u", target_user, "certutil", "-D", "-d", USER_CERT_DB,
-            "-n", "mitmproxy"])
+        user_cert_db_path = _user_cert_db_path(args)
+        if user_cert_db_path.is_dir():
+            subprocess.run(["sudo", "rm", "-Rf", str(user_cert_db_path)])
         _remove_managed_policies()

@@ -142,9 +142,11 @@ def _setup_proxy_for_url(args: Args) -> Optional[SubProc]:
         "--listen-port", args.proxy_port,
         "-s", str(LOG_HEADERS_SCRIPT_PATH),
         "--set", f"confdir={CERT_PATH}",
-        "-q",
-        encoded_args
+        "-q", encoded_args.decode("ascii")
     ]
+
+    if args.debug:
+        print("starting proxy: " + " ".join(mitmdump_args))
 
     proxy_handle = subprocess.Popen(mitmdump_args, stderr=None,
                                     universal_newlines=True)

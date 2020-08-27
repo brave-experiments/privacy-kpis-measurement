@@ -23,7 +23,9 @@ PARSER.add_argument("--proxy-host", default=DEFAULT_PROXY_HOST,
 PARSER.add_argument("--proxy-port", default=DEFAULT_PROXY_PORT, type=int,
                     help="The port to use when launching mitmproxy (only "
                     "used for MacOS).")
-
+PARSER.add_argument("--user", required=True,
+                    help="The user that will be doing the crawling (only used "
+                    "for chrome).")
 
 ARGS = privacykpis.environment.Args(PARSER.parse_args())
 if not ARGS.valid():
