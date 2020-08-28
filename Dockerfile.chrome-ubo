@@ -1,5 +1,5 @@
 FROM kaytwo/privacykpis:base
 
-RUN sudo /app/environment.py --install --case chrome
+RUN sudo /app/environment.py --install --case chrome --user scraper
 
 ENTRYPOINT ["/app/record.py","--binary","/usr/bin/google-chrome","--profile-template","profiles/chrome/ubo.tgz","--profile-path","/tmp/profiles/chrome-ubo","--case","chrome","--secs","30","--log","temp_output","--queue-host","redis.kaytwo.org", "--subcase", "ubo"]
