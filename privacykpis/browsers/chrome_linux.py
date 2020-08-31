@@ -9,7 +9,7 @@ import tarfile
 import time
 from typing import Any, Dict, List, Union
 
-from privacykpis.consts import RESOURCES_PATH
+from privacykpis.consts import CHROME_LEAF_CERT, RESOURCES_PATH
 import privacykpis.common
 import privacykpis.consts
 import privacykpis.environment
@@ -167,7 +167,7 @@ class Browser(privacykpis.browsers.Interface):
             ["certutil", "-N", "-d", user_cert_db, "--empty-password"],
             # Add the mitmproxy cert to the newly created database.
             ["certutil", "-A", "-d", user_cert_db, "-i",
-                str(privacykpis.consts.LEAF_CERT), "-n", "mitmproxy", "-t",
+                str(CHROME_LEAF_CERT), "-n", "mitmproxy", "-t",
                 "C,,"]
         ]
         sudo_prefix = ["sudo", "-u", target_user]
