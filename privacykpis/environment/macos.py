@@ -99,4 +99,4 @@ def teardown_env(args: privacykpis.environment.Args) -> None:
         subprocess.run(untrust_cert_cmd, check=True)
     except subprocess.CalledProcessError:
         if args.debug:
-            print("teardown_env: Looks like the cert wasn't installed afterall")
+            print("teardown_env: Looks like the cert wasn't installed")
