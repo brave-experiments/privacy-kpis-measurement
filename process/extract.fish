@@ -8,16 +8,16 @@ set FIRST_INDEX $argv[4];
 set SECOND_INDEX $argv[5];
 
 if not test -f "$SCRIPT_PATH";
-  echo "First arg should be path to the ./extract.py script."; 
+  echo "First arg should be path to the ./extract.py script.";
   exit 1;
 end;
 
 if not test -d "$INPUT_DIR"
-  echo "Second arg should be path of pickled graph data."; 
+  echo "Second arg should be path of pickled graph data.";
   exit 1;
 end;
 
-if not test -d "$OUTPUT_DIR" 
+if not test -d "$OUTPUT_DIR"
   echo "Third arg should be directory to write results to."
   exit 1
 end;
@@ -52,9 +52,10 @@ for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
     end;
 
     echo "Beginning $BROWSER, $DATASET";
-    ./$SCRIPT_PATH --input $MEASURE_GRAPH_PATH \
-                   --control $CONTROL_GRAPH_PATH \
-                   --format json \
-                   --output $OUTPUT_JSON_PATH;
+    $SCRIPT_PATH --input $MEASURE_GRAPH_PATH \
+                 --control $CONTROL_GRAPH_PATH \
+                 --format json \
+                 --output $OUTPUT_JSON_PATH;
+    echo "Completed $BROWSER, $DATASET";
   end;
 end;

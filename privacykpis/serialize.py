@@ -47,7 +47,7 @@ class SiteMeasurement:
         self.end_timestamp = datetime.datetime.fromisoformat(record["end"])
         self.url = record[URL]
         self.parsed_url = urlparse(record[URL])
-        self.etld_pone = PSL.privatesuffix(self.parsed_url.netloc)
+        self.etld_pone = PSL.privatesuffix(self.parsed_url.hostname)
         self.records = [Request(r) for r in record["requests"]]
         self.debug = debug
         self.redirect_cache = redirect_cache
@@ -77,7 +77,7 @@ class Request:
         self.body_encoding = tokens.body_encoding
         self.parsed_url = urlparse(record[URL])
         self.url = record[URL]
-        self.etld_pone = PSL.privatesuffix(self.parsed_url.netloc)
+        self.etld_pone = PSL.privatesuffix(self.parsed_url.hostname)
         self.timestamp = datetime.datetime.fromisoformat(record["time"])
 
     def add_to_graph(self, site: SiteMeasurement, graph: MultiDiGraph) -> None:

@@ -12,7 +12,7 @@ def is_datetime(token: str) -> bool:
 
     if isinstance(token, str):
         try:
-            dateutil.parser.parse(token)
+            dateutil.parser.parse(token, ignoretz=True)
             return True
         except (dateutil.parser.ParserError, OverflowError,  # type: ignore
                 calendar.IllegalMonthError, TypeError):

@@ -6,12 +6,12 @@ set GRAPH_DIR $argv[2];
 set OUTPUT_DIR $argv[3];
 
 if not test -f "$SCRIPT_PATH";
-  echo "First arg should be path to the ./serialize.py script."; 
+  echo "First arg should be path to the ./serialize.py script.";
   exit 1;
 end;
 
 if not test -d "$GRAPH_DIR";
-  echo "Second arg should be path of json data."; 
+  echo "Second arg should be path of json data.";
   exit 1;
 end;
 
@@ -34,7 +34,10 @@ for BROWSER in chrome-ubo firefox chrome chrome-brave safari;
       if test -f $OUTPUT_PATH;
         continue;
       end;
-      $SCRIPT_PATH --debug -r /tmp/redirects.pickle --input $INPUTS --multi --output $OUTPUT_PATH;
+      $SCRIPT_PATH --debug --multi \
+        --redirect-cache /tmp/redirects.pickle \
+        --input $INPUTS \
+        --output $OUTPUT_PATH;
     end;
   end;
 end;
