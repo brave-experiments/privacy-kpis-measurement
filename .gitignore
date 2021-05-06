@@ -10,3 +10,4 @@ env*
 
 privacykpis.*.json
 todays_dockers
+*.swp
