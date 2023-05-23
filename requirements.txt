@@ -11,7 +11,7 @@ publicsuffixlist==0.7.6
 pycodestyle==2.6.0
 pycparser==2.20
 python-dateutil==2.8.1
-requests==2.25.1
+requests==2.31.0
 six==1.15.0
 typed-ast==1.4.1
 typing-extensions==3.7.4.3
